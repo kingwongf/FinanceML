@@ -7,14 +7,23 @@ from yahoo_finance_api2.exceptions import YahooFinanceError
 from alpha_vantage.timeseries import TimeSeries
 from alpha_vantage.techindicators import TechIndicators
 import matplotlib.pyplot as plt
+from datetime import date
 
-ts = TimeSeries(key='7KGPPA617SS5ZKZO', output_format='pandas')
-price, meta_data = ts.get_intraday(symbol='EURUSD',interval='1min', outputsize='full')
+
+ticker = "EURUSD"
+interval = "daily"
+today = date.today()
+print(str(today))
+
+
+ts = TimeSeries(key='7kgppa617ss5zkzo', output_format='pandas')
+#price, meta_data = ts.get_intraday(symbol='EURUSD',interval='1min', outputsize='full')
+price, meta_data = ts.get_daily(symbol=ticker, outputsize='full')
 
 ta = TechIndicators(key='7KGPPA617SS5ZKZO', output_format='pandas')
-ema5, meta_ema5 = ta.get_ema(symbol='EURUSD',interval='1min', time_period='5')
-ema10, meta_ema10 = ta.get_ema(symbol='EURUSD',interval='1min', time_period='10')
-ema200, meta_ema10 = ta.get_ema(symbol='EURUSD',interval='1min', time_period='200')
+ema5, meta_ema5 = ta.get_ema(symbol=ticker,interval='daily', time_period='5')
+ema10, meta_ema10 = ta.get_ema(symbol=ticker,interval='daily', time_period='10')
+ema200, meta_ema10 = ta.get_ema(symbol=ticker,interval='daily', time_period='200')
 
 TAList = [ema5, ema10, ema200]
 TAName = ['5minEMA', '10minEMA', '200minEMA']
@@ -28,13 +37,13 @@ for i in range(len(TAList)):
     TAList[i].index = pd.to_datetime(TAList[i].index)
     price[TAName[i]] = TAList[i]
 
-""" df['5minEMA'] = ema5
-df['10minEMA'] = ema10
-df['200minEMA'] = ema200
- """
-print(df)
+#df['5minEMA'] = ema5
+#df['10minEMA'] = ema10
+#df['200minEMA'] = ema200
 
-df.to_csv('out.csv')
+print(price)
+
+price.to_csv('price_' + str(today) + '.csv')
 
 
 
