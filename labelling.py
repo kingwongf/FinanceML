@@ -2,11 +2,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm, tqdm_notebook
-import mpPandas
+import mp
 
 
 
-price = pd.read_csv('price_2019-06-24.csv')
+price = pd.read_csv("price_2019-06-24.csv")
 
 price.index = pd.to_datetime(price['date'])   
 
@@ -97,7 +97,7 @@ def getEvents(close, tEvents, ptSl, trgt, minRet, numThreads, t1=False, side=Non
     else: side_,ptSl_=side.loc[trgt.index],ptSl[:2]
     events=(pd.concat({'t1':t1,'trgt':trgt,'side':side_}, axis=1)
             .dropna(subset=['trgt']))
-    df0=mpPandas.mpPandasObj(func=applyPtSlOnT1,pdObj=('molecule',events.index),
+    df0=mp.mpPandasObj(func=applyPtSlOnT1,pdObj=('molecule',events.index),
                     numThreads=numThreads,close=close,events=events,
                     ptSl=ptSl_)
     events['t1']=df0.dropna(how='all').min(axis=1) # pd.min ignores nan
@@ -154,7 +154,7 @@ def getBins(events, close):
 
 ## apply triple barrier to get side of the bet of bins [-1, 0, 1]
 
-tEvents = getTEvents(price['4. close'], 0.01)
+tEvents = getTEvents(price['4. close'], 0.1)
 t1 = addVerticalBarrier(tEvents, price['4. close'])
 minRet = 0.001
 ptSl= [1,1]
@@ -163,6 +163,16 @@ events = getEvents(price['4. close'], tEvents, ptSl, trgt, minRet, 1, t1)
 labels = getBins(events, price['4. close'])
 print(labels)
 print(labels.bin.value_counts())
+print(price['4. close'])
+
+Xy = price.join(labels['bin'], how='left')
+
+
+print(Xy)
+
+
+
+
 
 
 
