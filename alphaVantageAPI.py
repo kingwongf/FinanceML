@@ -1,71 +1,60 @@
 
 import sys 
 import pandas as pd 
-from yahoo_finance_api2 import share 
-from yahoo_finance_api2.exceptions import YahooFinanceError
+import functools
 
 from alpha_vantage.timeseries import TimeSeries
 from alpha_vantage.techindicators import TechIndicators
-import matplotlib.pyplot as plt
 from datetime import date
 
 
 ticker = "EURUSD"
+
+'''supported values are '1min', '5min', '15min', '30min', '60min', 'daily', 'weekly', 'monthly' '''
+
 interval = "daily"
 today = date.today()
-print(str(today))
+key='NB6G0K9K27IGEWXW'
 
 
-ts = TimeSeries(key='7kgppa617ss5zkzo', output_format='pandas')
-#price, meta_data = ts.get_intraday(symbol='EURUSD',interval='1min', outputsize='full')
+ts = TimeSeries(key=key, output_format='pandas')
+
+'''intraday data fetch'''
+#price, meta_data = ts.get_intraday(symbol=ticker,interval=interval, outputsize='full')
+
+'''daily data fetch'''
 price, meta_data = ts.get_daily(symbol=ticker, outputsize='full')
 
-ta = TechIndicators(key='7KGPPA617SS5ZKZO', output_format='pandas')
-ema5, meta_ema5 = ta.get_ema(symbol=ticker,interval='daily', time_period='5')
-ema10, meta_ema10 = ta.get_ema(symbol=ticker,interval='daily', time_period='10')
-ema200, meta_ema10 = ta.get_ema(symbol=ticker,interval='daily', time_period='200')
 
-TAList = [ema5, ema10, ema200]
-TAName = ['5minEMA', '10minEMA', '200minEMA']
+ta = TechIndicators(key=key, output_format='pandas')
+ema5, meta_ema5 = ta.get_ema(symbol=ticker,interval=interval, time_period='5')
+ema10, meta_ema10 = ta.get_ema(symbol=ticker,interval=interval, time_period='10')
+ema200, meta_ema10 = ta.get_ema(symbol=ticker,interval=interval, time_period='200')
 
-
-#df = price['4. close'].to_frame()
-price.index = pd.to_datetime(price.index)
-
-
-for i in range(len(TAList)):
-    TAList[i].index = pd.to_datetime(TAList[i].index)
-    price[TAName[i]] = TAList[i]
-
-#df['5minEMA'] = ema5
-#df['10minEMA'] = ema10
-#df['200minEMA'] = ema200
-
-print(price)
-
-price.to_csv('price_' + str(today) + '.csv')
+macd, meta_macd = ta.get_macd(symbol=ticker,interval=interval, series_type='close',
+                 fastperiod=None, slowperiod=None, signalperiod=None)
+bbBands, meta_bbands = ta.get_bbands(symbol=ticker, interval=interval, time_period=20,  series_type='close',
+                   nbdevup=None, nbdevdn=None, matype=None)
+rsi, meta_rsi = ta.get_rsi(symbol=ticker,interval=interval, time_period=20, series_type='close')
+stochrsi, meta_stochrsi = ta.get_stochrsi(symbol=ticker,interval=interval, time_period=20,
+                     series_type='close', fastkperiod=None, fastdperiod=None, fastdmatype=None)
 
 
 
-#print(price['4. close'], ema5, ema10, ema200)
-""" data['4. close'].plot()
-plt.title('Intraday Times Series for the EURUSD (1 min)')
-plt.show() """
+
+TAList = [price, macd, ema5, ema10, ema200, rsi, stochrsi]
 
 
-""" my_share = share.Share('MSFT')
-symbol_data = None
+'''only works with daily for now'''
+df = functools.reduce(lambda left,right: pd.merge(left,right,on='date', how='left'), TAList)
 
-try: symbol_data = my_share.get_historical(share.PERIOD_TYPE_DAY, 100, share.FREQUENCY_TYPE_DAY,1)
-except YahooFinanceError as e:
-    print(e.message)
-    sys.exit(1)
+df.columns = ['date', '1. open', '2. high', '3. low', '4. close', '5. volume',
+       'MACD_Signal', 'MACD_Hist', 'MACD', 'EMA_5', 'EMA_10', 'EMA_200', 'RSI',
+       'FastD_StochRSI', 'FastK_StchRSI']
 
-df = pd.DataFrame(symbol_data)
-df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
 
-#df['5D_Rolliing'] = df.rolling()
 
-print(df)
+df.to_csv(interval + '_price_' + ticker + "_" + str(today) + '.csv')
 
-7KGPPA617SS5ZKZO """
+
+

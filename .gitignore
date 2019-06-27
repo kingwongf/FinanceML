@@ -11,6 +11,8 @@ someOtherfoler/
 *.exe
 *.o
 *.so
+*.pyc
+*.idea/
 
 *.so
 *.csv

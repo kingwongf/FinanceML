@@ -1,18 +1,8 @@
 import pandas as pd
-import matplotlib.pyplot as plt
 import numpy as np
-from tqdm import tqdm, tqdm_notebook
+from tqdm import tqdm
 import mp
 
-
-
-price = pd.read_csv("price_2019-06-24.csv")
-
-price.index = pd.to_datetime(price['date'])   
-
-#print(price)
-
-#df['ROC10Min'] = 
 
 def getDailyVol(close, span0 = 250):
     ''' to set profit-taking and stop loss of daily target/ tgrt
@@ -151,55 +141,3 @@ def getBins(events, close):
     if 'side' in events_:out.loc[out['ret']<=0,'bin']=0 # meta-labeling
     return out
 
-
-## apply triple barrier to get side of the bet of bins [-1, 0, 1]
-
-tEvents = getTEvents(price['4. close'], 0.1)
-print(tEvents)
-t1 = addVerticalBarrier(tEvents, price['4. close'], numDays=3)
-minRet = 0.001
-ptSl= [1,1]
-trgt = getDailyVol(price['4. close'])
-
-""" f,ax=plt.subplots()
-trgt.plot(ax=ax)
-ax.axhline(trgt.mean(),ls='--',color='r')
-plt.show() """
-
-events = getEvents(price['4. close'], tEvents, ptSl, trgt, minRet, 1, t1)
-labels = getBins(events, price['4. close'])
-print(labels, t1)
-print(labels.bin.value_counts())
-
-Xy = pd.merge_asof(price,labels,
-                   left_index=True, right_index=True, direction='forward'
-                   ,tolerance=pd.Timedelta('2ms'))
-
-
-Xy.loc[Xy['bin'] == 1.0, 'bin_pos'] = Xy['4. close']
-Xy.loc[Xy['bin'] == -1.0, 'bin_neg'] = Xy['4. close']
-
-
-f, ax = plt.subplots(figsize=(11,8))
-
-Xy['4. close'].plot(ax=ax, alpha=.5, label='close')
-Xy['bin_pos'].plot(ax=ax,ls='',marker='^', markersize=7,
-                     alpha=0.75, label='profit taking', color='g')
-Xy['bin_neg'].plot(ax=ax,ls='',marker='v', markersize=7, 
-                       alpha=0.75, label='stop loss', color='r')
-
-ax.legend()
-plt.title("Long only, 1 day max holding period profit taking and stop loss exit")
-
-plt.show()
-
-
-
-
-
-#print(getDailyVol(price['4. close']))
-
-""" price['dailyVol'] =getDailyVol(price['4. close']) 
-price[['4. close', 'dailyVol']].plot()
-plt.title('Intraday Times Series for the EURUSD (1 min)')
-plt.show() """
