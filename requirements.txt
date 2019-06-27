@@ -1,0 +1,7 @@
+alpha-vantage==2.0.0
+numpy>=1.16.2
+pandas==0.23.0
+decorator>=4.1.2
+tqdm>=4.32.2
+matplotlib>=2.1.0
+
