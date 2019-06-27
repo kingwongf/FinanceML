@@ -14,7 +14,7 @@ price.index = pd.to_datetime(price['date'])
 
 #df['ROC10Min'] = 
 
-def getDailyVol(close, span0 = 100):
+def getDailyVol(close, span0 = 250):
     ''' to set profit-taking and stop loss of daily target/ tgrt
      daily vol, reindexed to close'''
 
@@ -155,25 +155,43 @@ def getBins(events, close):
 ## apply triple barrier to get side of the bet of bins [-1, 0, 1]
 
 tEvents = getTEvents(price['4. close'], 0.1)
-t1 = addVerticalBarrier(tEvents, price['4. close'])
+print(tEvents)
+t1 = addVerticalBarrier(tEvents, price['4. close'], numDays=3)
 minRet = 0.001
 ptSl= [1,1]
 trgt = getDailyVol(price['4. close'])
+
+""" f,ax=plt.subplots()
+trgt.plot(ax=ax)
+ax.axhline(trgt.mean(),ls='--',color='r')
+plt.show() """
+
 events = getEvents(price['4. close'], tEvents, ptSl, trgt, minRet, 1, t1)
 labels = getBins(events, price['4. close'])
-print(labels)
+print(labels, t1)
 print(labels.bin.value_counts())
-print(price['4. close'])
 
-Xy = price.join(labels['bin'], how='left')
-
-
-print(Xy)
+Xy = pd.merge_asof(price,labels,
+                   left_index=True, right_index=True, direction='forward'
+                   ,tolerance=pd.Timedelta('2ms'))
 
 
+Xy.loc[Xy['bin'] == 1.0, 'bin_pos'] = Xy['4. close']
+Xy.loc[Xy['bin'] == -1.0, 'bin_neg'] = Xy['4. close']
 
 
+f, ax = plt.subplots(figsize=(11,8))
 
+Xy['4. close'].plot(ax=ax, alpha=.5, label='close')
+Xy['bin_pos'].plot(ax=ax,ls='',marker='^', markersize=7,
+                     alpha=0.75, label='profit taking', color='g')
+Xy['bin_neg'].plot(ax=ax,ls='',marker='v', markersize=7, 
+                       alpha=0.75, label='stop loss', color='r')
+
+ax.legend()
+plt.title("Long only, 1 day max holding period profit taking and stop loss exit")
+
+plt.show()
 
 
 
