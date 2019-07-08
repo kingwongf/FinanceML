@@ -3,33 +3,35 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm, tqdm_notebook
 import mp
-import labelling
+import labelling_Marcos
 
 
 price = pd.read_csv("daily_price_EURUSD_2019-06-27.csv")
 
-price.index = pd.to_datetime(price['date'])
+price.index = pd.to_datetime(price['date'], dayfirst=True)
+
+print(price.index)
 
 
 
 ## apply triple barrier to get side of the bet of bins [-1, 0, 1]
 
 ## CUSUM filter to define events of deviaiting from mean exceeding thereshold
-tEvents = labelling.getTEvents(price['4. close'], 0.1)
+tEvents = labelling_Marcos.getTEvents(price['4. close'], 0.1)
 
 maxHold = 3
-t1 = labelling.addVerticalBarrier(tEvents, price['4. close'], numDays=maxHold)
+t1 = labelling_Marcos.addVerticalBarrier(tEvents, price['4. close'], numDays=maxHold)
 minRet = 0.008
 ptSl= [1,1]
-trgt = labelling.getDailyVol(price['4. close'])
+trgt = labelling_Marcos.getDailyVol(price['4. close'])
 
 """ f,ax=plt.subplots()
 trgt.plot(ax=ax)
 ax.axhline(trgt.mean(),ls='--',color='r')
 plt.show() """
 
-events = labelling.getEvents(price['4. close'], tEvents, ptSl, trgt, minRet, 1, t1)
-labels = labelling.getBins(events, price['4. close'])
+events = labelling_Marcos.getEvents(price['4. close'], tEvents, ptSl, trgt, minRet, 1, t1)
+labels = labelling_Marcos.getBins(events, price['4. close'])
 
 Xy = pd.merge_asof(price,labels,
                    left_index=True, right_index=True, direction='forward'
