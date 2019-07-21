@@ -6,7 +6,7 @@ import mp
 import labelling_Marcos
 
 print(pd.__version__)
-price = pd.read_csv("daily_price_EURUSD_2019-06-27.csv")
+price = pd.read_csv("1min_price_EURTRY_2019-07-20_1min.csv")
 
 price.index = pd.to_datetime(price['date'])
 
@@ -44,6 +44,8 @@ def MACD(close):
     longEma = close.ewm(adjust=True, alpha=0.075).mean()
     macd = shortEma - longEma
     return macd
+
+
 
 
 #K, D = stochRSI(price['4. close'])

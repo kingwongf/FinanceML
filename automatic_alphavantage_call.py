@@ -1,29 +1,55 @@
 
-import sys 
-import pandas as pd 
 import functools
-
-from alpha_vantage.timeseries import TimeSeries
-from alpha_vantage.foreignexchange import ForeignExchange
-from alpha_vantage.techindicators import TechIndicators
+import sys
 from datetime import date
 
+import pandas as pd
 
-ticker = "USDTRY"
+from alpha_vantage.foreignexchange import ForeignExchange
+from alpha_vantage.techindicators import TechIndicators
+from alpha_vantage.timeseries import TimeSeries
+
+tickers = [['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD']
+            ,['CADCHF', 'CADJPY', 'EURAUD', 'EURCAD', 'EURCHF']
+            ,['EURGBP', 'EURJPY', 'EURNOK', 'EURNZD', 'EURSEK']]
+
+#
+#            , "EURAUD", "EURNZD", "USDSEK"
+#            , "EURUSD", "USDCAD", "EURGBP"
+#            , "GBPUSD", "CHFJPY", "EURNOK"
+#            . "AUDCAD"]
+
+
+keys = ['NB6G0K9K27IGEWXW', 'K3NSH7AF0NABI13X', 'FUMX5ZM974HWS3X1']
+interval = "1min"
+today = date.today()
+#ticker = "USDTRY"
+
+
+for i, ticker in enumerate(tickers):
+    ts = TimeSeries(key=keys[i], output_format='pandas')
+    for j in range(len(ticker[i]) - 1 ):
+        print(keys[i])
+        price, meta_data = ts.get_intraday(symbol=ticker[j],interval=interval, outputsize='full')
+        price.rename(columns=lambda x: ticker[j] + " " + x, inplace=True)
+        price.to_csv(interval + '_price_' + ticker[j] + "_" + str(today) + '.csv') 
+
+
 
 '''supported values are '1min', '5min', '15min', '30min', '60min', 'daily', 'weekly', 'monthly' '''
 
-interval = "1min"
-today = date.today()
-key='NB6G0K9K27IGEWXW'
 
 
-ts = TimeSeries(key=key, output_format='pandas')
+#key='NB6G0K9K27IGEWXW'
+#key='K3NSH7AF0NABI13X'
+
+
+#ts = TimeSeries(key=key, output_format='pandas')
 
 '''intraday data fetch'''
-price, meta_data = ts.get_intraday(symbol=ticker,interval=interval, outputsize='full')
+#price, meta_data = ts.get_intraday(symbol=ticker,interval=interval, outputsize='full')
 
-print(price)
+#print(price)
 '''daily data fetch'''
 #price, meta_data = ts.get_daily(symbol=ticker, outputsize='full')
 
@@ -56,7 +82,4 @@ print(price)
 
 
 #df.to_csv(interval + '_price_' + ticker + "_" + str(today) +"_" + '.csv')
-price.to_csv(interval + '_price_' + ticker + "_" + str(today) + '.csv')
-
-
-
+#price.to_csv(interval + '_price_' + ticker + "_" + str(today) + '.csv')
