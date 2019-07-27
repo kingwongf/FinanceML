@@ -2,6 +2,9 @@
 import functools
 import sys
 from datetime import date
+from fake_useragent import UserAgent
+import random
+import time
 
 import pandas as pd
 
@@ -9,34 +12,41 @@ from alpha_vantage.foreignexchange import ForeignExchange
 from alpha_vantage.techindicators import TechIndicators
 from alpha_vantage.timeseries import TimeSeries
 
-tickers = [['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD']
-            ,['CADCHF', 'CADJPY', 'EURAUD', 'EURCAD', 'EURCHF']
-            ,['EURGBP', 'EURJPY', 'EURNOK', 'EURNZD', 'EURSEK']]
-
-#
-#            , "EURAUD", "EURNZD", "USDSEK"
-#            , "EURUSD", "USDCAD", "EURGBP"
-#            , "GBPUSD", "CHFJPY", "EURNOK"
-#            . "AUDCAD"]
-
-
-keys = ['NB6G0K9K27IGEWXW', 'K3NSH7AF0NABI13X', 'FUMX5ZM974HWS3X1']
-interval = "1min"
-today = date.today()
-#ticker = "USDTRY"
+tickers = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD'
+            ,'CADCHF', 'CADJPY', 'EURAUD', 'EURCAD', 'EURCHF'
+            ,'EURGBP', 'EURJPY', 'EURNOK', 'EURNZD', 'EURSEK'
+            ,'EURTRY', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF'
+            ,'GBPJPY', 'GBPNZD', 'GBPUSD', 'NZDCAD', 'NZDCHF'
+            ,'NZDJPY', 'NZDUSD', 'TRYJPY', 'USDCAD', 'USDCHF'
+            ,'USDCNH', 'USDJPY', 'USDMXN', 'USDNOK', 'USDSEK'
+            ,'USDTRY', 'USDZAR', 'ZARJPY']
 
 
-for i, ticker in enumerate(tickers):
-    ts = TimeSeries(key=keys[i], output_format='pandas')
-    for j in range(len(ticker[i]) - 1 ):
-        print(keys[i])
-        price, meta_data = ts.get_intraday(symbol=ticker[j],interval=interval, outputsize='full')
-        price.rename(columns=lambda x: ticker[j] + " " + x, inplace=True)
-        price.to_csv(interval + '_price_' + ticker[j] + "_" + str(today) + '.csv') 
 
 
+#keys = ['FUMX5ZM974HWS3X1', 'NB6G0K9K27IGEWXW', 'K3NSH7AF0NABI13X']
+key = 'K3NSH7AF0NABI13X'
 
 '''supported values are '1min', '5min', '15min', '30min', '60min', 'daily', 'weekly', 'monthly' '''
+interval = "1min"
+today = date.today()
+
+
+for i,ticker in enumerate(tickers):
+    if i%5==0 and i!=0:
+        print("1 min wait triggered")
+        time.sleep(60)
+    ts = TimeSeries(key=key, output_format='pandas')
+    price, meta_data = ts.get_intraday(symbol=ticker, interval=interval, outputsize='full')
+    price.rename(columns=lambda x: ticker + " " + x, inplace=True)
+    price.to_csv("data/" + interval + '_price_' + ticker + "_" + str(today) + '.csv')
+    print("finished " + ticker + " " + str(today))
+
+
+
+
+
+
 
 
 
