@@ -3,6 +3,8 @@ node_modules/
 someOtherfoler/
 resources/
 data/
+keys.txt
+
 
 # Compiled source #
 ###################
@@ -32,3 +34,5 @@ data/
 *.tar
 *.zip
 
+.gitsecret/keys/random_seed
+!*.secret
