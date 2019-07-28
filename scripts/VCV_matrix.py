@@ -16,9 +16,11 @@ tickers = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD'
             ,'USDTRY', 'USDZAR', 'ZARJPY']
 
 interval = "1min"
-today = date.today()
+# today = date.today()
+date = "2019-07-27"
 date_parser = pd.to_datetime
-prices = [pd.read_csv("data/" + interval + '_price_' + ticker + "_" + str(today) + '.csv', date_parser=date_parser) for ticker in tickers]
+prices = [pd.read_csv("data/" + date + "/" + interval + '_price_'
+                      + ticker + "_" + date + '.csv', date_parser=date_parser) for ticker in tickers]
 
 # price.index = pd.to_datetime(price['date'], dayfirst=True)
 
@@ -59,13 +61,7 @@ xticks = closes.index
 plt.yticks(rotation=0)
 plt.xticks(rotation=90)
 plt.gcf().subplots_adjust(bottom=0.15)
-plt.title("Empirical Correlation Matrix on " + str(today))
-#plt.show()
+plt.title("Empirical Correlation Matrix on " + date )
+plt.savefig("resources/" + "Empirical Correlation Matrix on " + date +'.png' , dpi=f.dpi)
+plt.show()
 
-corr = np.fill_diagonal(corr.values, 0)
-#corr = corr.where(mask)
-
-
-print(corr)
-#nlargest(columns=corr.columns, n=10)
-#, corr.where(mask).nsmallest(columns=corr.columns,n=10)

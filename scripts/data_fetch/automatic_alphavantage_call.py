@@ -25,7 +25,7 @@ tickers = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD'
 
 
 #keys = ['FUMX5ZM974HWS3X1', 'NB6G0K9K27IGEWXW', 'K3NSH7AF0NABI13X']
-key = 'K3NSH7AF0NABI13X'
+key = 'NB6G0K9K27IGEWXW'
 
 '''supported values are '1min', '5min', '15min', '30min', '60min', 'daily', 'weekly', 'monthly' '''
 interval = "1min"
@@ -39,7 +39,7 @@ for i,ticker in enumerate(tickers):
     ts = TimeSeries(key=key, output_format='pandas')
     price, meta_data = ts.get_intraday(symbol=ticker, interval=interval, outputsize='full')
     price.rename(columns=lambda x: ticker + " " + x, inplace=True)
-    price.to_csv("data/" + interval + '_price_' + ticker + "_" + str(today) + '.csv')
+    price.to_csv("data/" + "2019-07-29" + "/" + interval + '_price_' + ticker + "_" + str(today) + '.csv')
     print("finished " + ticker + " " + str(today))
 
 
