@@ -1,12 +1,9 @@
 import sys
 from datetime import date
-import random
 import time
+import os
 
 import pandas as pd
-
-from alpha_vantage.foreignexchange import ForeignExchange
-from alpha_vantage.techindicators import TechIndicators
 from alpha_vantage.timeseries import TimeSeries
 
 tickers = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD'
@@ -20,14 +17,21 @@ tickers = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD'
 
 
 
-
-
-keys_file = open("keys.txt", "r")
+keys_file = open("resources/keys.txt", "r")
 
 for lines in keys_file:
     keys = lines.split(",")
 
 key = keys[0]
+
+
+keys_file = open("resources/keys.txt", "r")
+
+for lines in keys_file:
+    keys = lines.split(",")
+
+key = keys[0]
+
 
 '''supported values are '1min', '5min', '15min', '30min', '60min', 'daily', 'weekly', 'monthly' '''
 
@@ -35,7 +39,8 @@ key = keys[0]
 
 interval = "1min"
 today = date.today()
-
+today_dir = "data/" + today
+os.mkdir(today_dir)
 
 for i,ticker in enumerate(tickers):
     if i%5==0 and i!=0:
@@ -44,7 +49,7 @@ for i,ticker in enumerate(tickers):
     ts = TimeSeries(key=key, output_format='pandas')
     price, meta_data = ts.get_intraday(symbol=ticker, interval=interval, outputsize='full')
     price.rename(columns=lambda x: ticker + " " + x, inplace=True)
-    price.to_csv("data/" + "2019-07-29" + "/" + interval + '_price_' + ticker + "_" + str(today) + '.csv')
+    price.to_csv(today_dir + "/" + interval + '_price_' + ticker + "_" + str(today) + '.csv')
     print("finished " + ticker + " " + str(today))
 
 
