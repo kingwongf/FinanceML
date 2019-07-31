@@ -21,8 +21,8 @@ tickers = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD'
 
 interval = "1min"
 today = date.today()
-date = "2019-07-27"
-date_dir = "data/2019-07-27/"
+date = "2019-07-31"
+date_dir = "data/" + date + "/"
 date_parser = pd.to_datetime
 #prices = [pd.read_csv("data/" + interval + '_price_' + ticker + "_" + str(today) + '.csv', date_parser=date_parser) for ticker in tickers]
 prices = [pd.read_csv( date_dir + interval + '_price_' + ticker + "_" + date + '.csv', date_parser=date_parser) for ticker in tickers]
@@ -67,9 +67,10 @@ xticks = closes.index
 plt.yticks(rotation=0)
 plt.xticks(rotation=90)
 plt.gcf().subplots_adjust(bottom=0.15)
-plt.title("Empirical Correlation Matrix on " + str(today))
+plt.title("Empirical Correlation Matrix on " + date )
 plt.savefig("resources/Empirical Correlation Matrix on " + date +'.png' , dpi=f.dpi)
 #plt.show()
+plt.close()
 
 #print(corr)
 absCorr = corr.abs()
@@ -98,15 +99,14 @@ sol['cointegration'] = coIntegrate
 cointegratedPairs = sol[coIntegrate]
 cointegratedPairs = cointegratedPairs.reset_index()
 
-n_column_graphs = len(cointegratedPairs)//2
-
-fig, axs = plt.subplots(2,n_column_graphs, figsize=(30, 10), facecolor='w', edgecolor='k')
+#n_column_graphs = len(cointegratedPairs)//2
+n_column_graphs = 10
+fig, axs = plt.subplots(2,n_column_graphs//2, figsize=(30, 10), facecolor='w', edgecolor='k')
 fig.subplots_adjust(hspace = .5, wspace=.001)
 axs = axs.ravel()
 
-for i in range(len(cointegratedPairs)):
-#    print(cointegratedPairs['pairs'][i][0])   
-#    print(closes[cointegratedPairs['pairs'][i][1]])
+print(axs)
+for i in range(n_column_graphs):
     pairs_trading_ratio = closes[cointegratedPairs['pairs'][i][0]]/closes[cointegratedPairs['pairs'][i][1]]
     MA_1hr = featGen.ema(pairs_trading_ratio, 60)
     axs[i].plot(pairs_trading_ratio)
@@ -118,22 +118,23 @@ plt.savefig("resources/Ratio of Cointegrated Forex Pairs on " + date +'.png' , d
 
 plt.close('all')
 
-fig, axs = plt.subplots(2,n_column_graphs, figsize=(30, 10), facecolor='w', edgecolor='k')
+fig, axs = plt.subplots(2,5, figsize=(30, 10), facecolor='w', edgecolor='k')
 fig.subplots_adjust(hspace = .5, wspace=.001)
 
-for i,ax_row in enumerate(axs):
+
+i=0
+for ax_row in axs:
     for ax in ax_row:
-#    print(cointegratedPairs['pairs'][i][0])   
-#    print(closes[cointegratedPairs['pairs'][i][1]])
         ax2 = ax.twinx()
         ts1 = closes[cointegratedPairs['pairs'][i][0]]
         ts2 = closes[cointegratedPairs['pairs'][i][1]]
         ax.plot(ts1)
         ax2.plot(ts2, 'r-')
         ax.set_title(cointegratedPairs['pairs'][i][0] + " and " + cointegratedPairs['pairs'][i][1])
+        i+=1
 plt.suptitle("Cointegrated Forex Pairs")
 plt.savefig("resources/Cointegrated Forex Pairs on " + date +'.png' , dpi=f.dpi)
-    
+
 
 ''' test for cointegration wuth top nth pairs'''
 

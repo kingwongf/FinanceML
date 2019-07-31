@@ -18,6 +18,7 @@ keys.txt
 *.so
 *.pyc
 *.idea/
+*.png
 
 *.so
 *.csv

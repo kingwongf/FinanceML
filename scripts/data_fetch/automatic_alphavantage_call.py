@@ -39,7 +39,7 @@ key = keys[0]
 
 interval = "1min"
 today = date.today()
-today_dir = "data/" + today
+today_dir = "data/" + str(today)
 os.mkdir(today_dir)
 
 for i,ticker in enumerate(tickers):

@@ -13,8 +13,8 @@ import labelling_Marcos
 #df = df.sort_index()
 #name = 'EMA_' % span
 
-def ema(close, span):
-    ema = close.ewm(span=span,adjust=False,ignore_na=False).mean()
+def ema(close, span=None, alpha=None):
+    ema = close.ewm(span=span, alpha=alpha,adjust=False,ignore_na=False).mean()
     return ema
 
 def relEMA(fast_ema, slow_ema):
