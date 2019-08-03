@@ -13,35 +13,17 @@ pd.set_option('display.max_columns', None)  # or 1000
 pd.set_option('display.max_rows', None)  # or 1000
 pd.set_option('display.max_colwidth', -1)  # or 199
 
+date = "2019-07-28"
+
 ## Approach 2 Cumsum filter and getEvents from Marcos to label the sides of the bet
+## then we use a ML model to learn the sides of the bet
 ## first consider EURNZD
 
+closes  = pd.read_pickle("scripts/research/EURNZD_USDCHF_Cointegration/EURNZD_USDCHF.pkl")
 
-tickers = ['EURNZD', 'USDCHF']
-
-interval = "1min"
-today = date.today()
-date = "2019-07-28"
-date_dir = "data/" + date + "/"
-date_parser = pd.to_datetime
-#prices = [pd.read_csv("data/" + interval + '_price_' + ticker + "_" + str(today) + '.csv', date_parser=date_parser) for ticker in tickers]
-prices = [pd.read_csv( date_dir + interval + '_price_' + ticker + "_" + date + '.csv', date_parser=date_parser) for ticker in tickers]
-
-
-
-closes = pd.DataFrame([])
-
-for i,ticker in enumerate(tickers):
-    prices[i].index = pd.to_datetime(prices[i]['date'], dayfirst=True)
-    if i==0:
-        closes = prices[i][ticker + " 4. close"]
-    else:
-        closes = pd.merge_asof(closes, prices[i][ticker + " 4. close"],
-                    left_index=True, right_index=True,
-                    direction='forward',tolerance=pd.Timedelta('2ms')).dropna()
 
 ## TODO resample to dt mins
-dt = '1T'
+dt = '30T'
 
 
 closes = closes.resample(dt).last()
@@ -51,7 +33,7 @@ closes.index = pd.to_datetime(closes.index, dayfirst=True)
 closes['ratio'] = closes['EURNZD 4. close']/closes['USDCHF 4. close']
 
 ## get tEvents according to ratio
-h=0.001
+h=0.0001
 tEvents = labelling_Marcos.getTEvents(closes['ratio'], h)
 
 ## tEvents of EURNZD, USDCHF and ratio
@@ -81,33 +63,26 @@ minRet = 0.001
 ptSl= [1,1]         ## upper barrier = trgt*ptSl[0] and lower barrier = trgt*ptSl[1]
 trgt = labelling_Marcos.getDailyVol(closes['EURNZD 4. close'])  ## unit width of the horizon barrier
 
-"""
-f,ax=plt.subplots()
-trgt.plot(ax=ax)
-ax.axhline(trgt.mean(),ls='--',color='r')
-plt.show()
-plt.close()
-"""
-
 
 events = labelling_Marcos.getEvents(closes['EURNZD 4. close'], tEvents, ptSl, trgt, minRet, 1, t1)
 labels = labelling_Marcos.getBins(events, closes['EURNZD 4. close'])
 
-Xy = pd.merge_asof(closes['EURNZD 4. close'],labels,
+
+labelPlot = pd.merge_asof(closes['EURNZD 4. close'],labels,
                    left_index=True, right_index=True, direction='forward'
                    ,tolerance=pd.Timedelta('2ms'))
 
 
-Xy.loc[Xy['bin'] == 1.0, 'bin_pos'] = Xy['EURNZD 4. close']
-Xy.loc[Xy['bin'] == -1.0, 'bin_neg'] = Xy['EURNZD 4. close']
+labelPlot.loc[labelPlot['bin'] == 1.0, 'bin_pos'] = labelPlot['EURNZD 4. close']
+labelPlot.loc[labelPlot['bin'] == -1.0, 'bin_neg'] = labelPlot['EURNZD 4. close']
 
 
 f, ax = plt.subplots(figsize=(11,5))
 
-Xy['EURNZD 4. close'].plot(ax=ax, alpha=.5, label='close')
-Xy['bin_pos'].plot(ax=ax,ls='',marker='^', markersize=7,
+labelPlot['EURNZD 4. close'].plot(ax=ax, alpha=.5, label='close')
+labelPlot['bin_pos'].plot(ax=ax,ls='',marker='^', markersize=7,
                      alpha=0.75, label='buy', color='g')
-Xy['bin_neg'].plot(ax=ax,ls='',marker='v', markersize=7,
+labelPlot['bin_neg'].plot(ax=ax,ls='',marker='v', markersize=7,
                        alpha=0.75, label='sell', color='r')
 
 ax.legend()
@@ -115,4 +90,78 @@ plt.title("%s min max holding period long and short signals for EURNZD"%(maxHold
 #plt.savefig("resources/%s min max holding period long and short signals for EURNZD"%(maxHold*int(dt[:-1])) + date )
 #plt.show()
 plt.close()
+
+
+## now we need to set up and train a ML model to predict the label/ side of the bet
+## features: ratio
+## label: side [-1, 0, 1], [short, not trade, long]
+
+X = closes[['ratio','EURNZD 4. close']]
+labelPlot['bin'] = labelPlot['bin'].fillna(0)
+y = labelPlot['bin']
+
+Xy = (pd.merge_asof(X, y,
+                    left_index=True, right_index=True,
+                    direction='forward',tolerance=pd.Timedelta('2ms')).dropna())
+
+X = Xy.drop('bin',axis=1).values
+y = Xy['bin'].values
+
+
+
+## Data normalisation
+
+from sklearn.preprocessing import MinMaxScaler
+scaler = MinMaxScaler(feature_range = (0, 1))
+
+X_scaled = scaler.fit_transform(X)
+y_scaled = scaler.fit_transform(y.reshape(-1, 1))
+
+X_array, y_array = np.array(X), np.array(y)
+
+
+
+## for model to read, we need array form of X [time span, number of time step to predict, no. of feat]
+
+features_set = np.reshape(X_array, (X_array.shape[0], 1, X_array.shape[1]))
+
+
+#X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.8,shuffle=False)
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import LSTM
+from tensorflow.keras.layers import Dropout
+
+
+model = Sequential()
+
+model.add(LSTM(units=50, return_sequences=True, input_shape=(features_set.shape[1], X_array.shape[1])))
+model.add(Dropout(0.2))
+model.add(LSTM(units=100, return_sequences=True))
+model.add(Dropout(0.2))
+model.add(LSTM(units=1000, return_sequences=True))
+model.add(Dropout(0.2))
+model.add(LSTM(units=50))
+model.add(Dropout(0.2))
+model.add(Dense(units = 1))
+
+model.compile(optimizer = 'adam', loss = 'mean_squared_error'
+              , metrics=['accuracy'])
+model.fit(features_set, y_array, epochs = 100, batch_size = 32
+          , validation_split=0.33)
+
+
+
+''' 
+clearly the model is insufficient as we have only 237 X points to train and validate with,
+we will come back to this late when we have more data and eliminate weekends
+'''
+
+
+
+
+
+
+
 

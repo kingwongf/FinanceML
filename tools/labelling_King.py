@@ -12,6 +12,9 @@ def predict_ret(close, lookahead_period, min_ret=0):
     out['ret'] = ret.shift(-lookahead_period)
     return out
 
+
+
+
 #def predict_side(close, lookahead_period, )
 
 #print(predict_ret(df, 2, 0.01))

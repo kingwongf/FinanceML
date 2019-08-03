@@ -22,14 +22,6 @@ keys_file = open("resources/keys.txt", "r")
 for lines in keys_file:
     keys = lines.split(",")
 
-key = keys[0]
-
-
-keys_file = open("resources/keys.txt", "r")
-
-for lines in keys_file:
-    keys = lines.split(",")
-
 key = keys[1]
 
 

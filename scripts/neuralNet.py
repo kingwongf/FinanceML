@@ -1,9 +1,9 @@
 import pandas as pd
-import featGen
+from tools import featGen
 import numpy as np
 import sys
 np.set_printoptions(threshold=sys.maxsize)
-import labelling_Marcos
+from tools import labelling_Marcos
 
 from keras.models import Sequential
 from keras.layers import Dense, Activation
@@ -19,6 +19,7 @@ price = pd.read_csv("daily_price_EURUSD_2019-06-27.csv")
 price.index = pd.to_datetime(price['date'], dayfirst=True)
 
 K,D = featGen.stochRSI(price['4. close'], 14)
+
 feat = (pd.DataFrame()
         .assign(ema5= featGen.ema(price['4. close'], 5))
         .assign(ema10=featGen.ema(price['4. close'], 10))

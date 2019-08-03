@@ -1,14 +1,37 @@
+import numpy as np
+import sklearn.covariance
+from datetime import date
+import pandas as pd
+import seaborn as sns
+import statsmodels.api as sm
+import matplotlib.pyplot as plt
+
+
+from tools import featGen
+from tools import labelling_Marcos
 pd.set_option('display.max_columns', None)  # or 1000
 pd.set_option('display.max_rows', None)  # or 1000
 pd.set_option('display.max_colwidth', -1)  # or 199
 
-## Approach 2 Cumsum filter and getEvents from Marcos to label the sides of the bet
-## first consider EURNZD
+
+
+## Recap
+''' from cointegration vcv research we know EURNZD and USDCHF are cointegrated
+
+We want to develop a pairs trading strategy based on that, 
+short EURNZD and long USDCHF when pairs ratio EURNZD/ USDCHF climbs
+long EURNZD and short USDCHF when pairs ratio declines
+
+
+We need to prepare and pickle the data first before running any of the 3 approaches
+
+'''
 
 
 tickers = ['EURNZD', 'USDCHF']
 
 interval = "1min"
+
 today = date.today()
 date = "2019-07-28"
 date_dir = "data/" + date + "/"
@@ -28,3 +51,7 @@ for i,ticker in enumerate(tickers):
         closes = pd.merge_asof(closes, prices[i][ticker + " 4. close"],
                     left_index=True, right_index=True,
                     direction='forward',tolerance=pd.Timedelta('2ms')).dropna()
+
+
+
+closes.to_pickle("scripts/research/EURNZD_USDCHF_Cointegration/EURNZD_USDCHF.pkl")
