@@ -14,4 +14,4 @@ def predict_ret(close, lookahead_period, min_ret=0):
 
 #def predict_side(close, lookahead_period, )
 
-print(predict_ret(df, 2, 0.01))
+#print(predict_ret(df, 2, 0.01))

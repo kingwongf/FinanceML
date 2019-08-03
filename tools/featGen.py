@@ -2,8 +2,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm, tqdm_notebook
-import mp
-import labelling_Marcos
+from tools import mp
+from tools import labelling_Marcos
 
 #print(pd.__version__)
 #price = pd.read_csv("1min_price_EURTRY_2019-07-20_1min.csv")

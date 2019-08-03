@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-import mp
+from tools import mp
 
 
 def getDailyVol(close, span0 = 250):

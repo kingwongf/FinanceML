@@ -5,7 +5,7 @@ import pandas as pd
 import seaborn as sns
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
-import featGen
+from tools import featGen
 pd.set_option('display.max_columns', None)  # or 1000
 pd.set_option('display.max_rows', None)  # or 1000
 pd.set_option('display.max_colwidth', -1)  # or 199
@@ -22,6 +22,7 @@ tickers = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD'
 interval = "1min"
 today = date.today()
 date = "2019-07-31"
+date = str(today)
 date_dir = "data/" + date + "/"
 date_parser = pd.to_datetime
 #prices = [pd.read_csv("data/" + interval + '_price_' + ticker + "_" + str(today) + '.csv', date_parser=date_parser) for ticker in tickers]
@@ -68,7 +69,7 @@ plt.yticks(rotation=0)
 plt.xticks(rotation=90)
 plt.gcf().subplots_adjust(bottom=0.15)
 plt.title("Empirical Correlation Matrix on " + date )
-plt.savefig("resources/Empirical Correlation Matrix on " + date +'.png' , dpi=f.dpi)
+#plt.savefig("resources/Empirical Correlation Matrix on " + date +'.png' , dpi=f.dpi)
 #plt.show()
 plt.close()
 
@@ -99,28 +100,30 @@ sol['cointegration'] = coIntegrate
 cointegratedPairs = sol[coIntegrate]
 cointegratedPairs = cointegratedPairs.reset_index()
 
-#n_column_graphs = len(cointegratedPairs)//2
-n_column_graphs = 10
-fig, axs = plt.subplots(2,n_column_graphs//2, figsize=(30, 10), facecolor='w', edgecolor='k')
+#print(cointegratedPairs)
+n_column_graphs = len(cointegratedPairs)//2
+# n_column_graphs = 10
+fig, axs = plt.subplots(2,n_column_graphs, figsize=(30, 10), facecolor='w', edgecolor='k')
 fig.subplots_adjust(hspace = .5, wspace=.001)
 axs = axs.ravel()
 
-print(axs)
-for i in range(n_column_graphs):
+for i in range(len(cointegratedPairs)):
     pairs_trading_ratio = closes[cointegratedPairs['pairs'][i][0]]/closes[cointegratedPairs['pairs'][i][1]]
     MA_1hr = featGen.ema(pairs_trading_ratio, 60)
     axs[i].plot(pairs_trading_ratio)
     axs[i].plot(MA_1hr)
     axs[i].set_title(cointegratedPairs['pairs'][i][0] + "/" + cointegratedPairs['pairs'][i][1])
 plt.suptitle("Ratio of Cointegrated Forex Pairs")
-plt.savefig("resources/Ratio of Cointegrated Forex Pairs on " + date +'.png' , dpi=f.dpi)
+#plt.savefig("resources/Ratio of Cointegrated Forex Pairs on " + date +'.png' , dpi=f.dpi)
 #plt.show()
+
 
 plt.close('all')
 
-fig, axs = plt.subplots(2,5, figsize=(30, 10), facecolor='w', edgecolor='k')
+fig, axs = plt.subplots(2,n_column_graphs, figsize=(30, 10), facecolor='w', edgecolor='k')
 fig.subplots_adjust(hspace = .5, wspace=.001)
 
+print(axs)
 
 i=0
 for ax_row in axs:

@@ -5,11 +5,16 @@ import pandas as pd
 import seaborn as sns
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
-import featGen
-import labelling_Marcos
+
+
+from tools import featGen
+from tools import labelling_Marcos
 pd.set_option('display.max_columns', None)  # or 1000
 pd.set_option('display.max_rows', None)  # or 1000
 pd.set_option('display.max_colwidth', -1)  # or 199
+
+
+
 
 tickers = ['EURNZD', 'USDCHF']
 
@@ -42,9 +47,13 @@ short EURNZD and long USDCHF when pairs ratio EURNZD/ USDCHF climbs
 long EURNZD and short USDCHF when pairs ratio declines
 '''
 
-## resample to dt mins
-dt = '30T'
+## TODO resample to dt mins
+dt = '1T'
+
+
 closes = closes.resample(dt).last()
+
+closes.index = pd.to_datetime(closes.index, dayfirst=True)
 
 
 ## plot historical ratio
@@ -133,15 +142,6 @@ axs[3].set_title('Ratio')
 #fig.subplots_adjust(hspace = .5, wspace=.001)
 #plt.show()
 plt.suptitle("Pairs Trading GARCH Boundaries Approach")
-plt.savefig("resources/Pairs Trading GARCH Approach.png")
+#plt.savefig("resources/Pairs Trading GARCH Approach.png")
+plt.close()
 
-
-## Option 2 Cumsum filter from Marcos
-
-tEvents = getTEvents(['ratio'], h)
-'''
-print(closes[['ratio','long', 'short']])
-
-closes.loc[closes['long'] == 1.0, ''] = closes['EURNZD 4. close']
-closes.loc[closes['short'] == -1.0, 'bin_neg'] = Xy['4. close']
-'''

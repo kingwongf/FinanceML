@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm, tqdm_notebook
 import mp
-import labelling_Marcos
+from tools import labelling_Marcos
 
 
-price = pd.read_csv("daily_price_EURUSD_2019-06-27.csv")
+price = pd.read_csv("data/2019-06-27/daily_price_EURUSD_2019-06-27.csv")
 
 price.index = pd.to_datetime(price['date'], dayfirst=True)
 
@@ -22,7 +22,7 @@ tEvents = labelling_Marcos.getTEvents(price['4. close'], 0.1)
 maxHold = 3
 t1 = labelling_Marcos.addVerticalBarrier(tEvents, price['4. close'], numDays=maxHold)
 minRet = 0.008
-ptSl= [1,1]
+ptSl= [1,1] ## upper barrier = trgt*ptSl[0] and lower barrier = trgt*ptSl[1]
 trgt = labelling_Marcos.getDailyVol(price['4. close'])
 
 """ f,ax=plt.subplots()
