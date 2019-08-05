@@ -33,11 +33,11 @@ tickers = ['EURNZD', 'USDCHF']
 interval = "1min"
 
 today = date.today()
-date = "2019-07-28"
-date_dir = "data/" + date + "/"
+readin_date = "2019-07-28"
+date_dir = "data/" + readin_date + "/"
 date_parser = pd.to_datetime
 #prices = [pd.read_csv("data/" + interval + '_price_' + ticker + "_" + str(today) + '.csv', date_parser=date_parser) for ticker in tickers]
-prices = [pd.read_csv( date_dir + interval + '_price_' + ticker + "_" + date + '.csv', date_parser=date_parser) for ticker in tickers]
+prices = [pd.read_csv( date_dir + interval + '_price_' + ticker + "_" + readin_date + '.csv', date_parser=date_parser) for ticker in tickers]
 
 
 
@@ -53,5 +53,7 @@ for i,ticker in enumerate(tickers):
                     direction='forward',tolerance=pd.Timedelta('2ms')).dropna()
 
 
-
+closes = closes.loc[~closes.index.duplicated(keep='first')]
 closes.to_pickle("scripts/research/EURNZD_USDCHF_Cointegration/EURNZD_USDCHF.pkl")
+
+

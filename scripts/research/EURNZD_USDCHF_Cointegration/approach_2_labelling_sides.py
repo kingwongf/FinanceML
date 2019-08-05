@@ -3,7 +3,6 @@ import sklearn.covariance
 from datetime import date
 import pandas as pd
 import seaborn as sns
-import statsmodels.api as sm
 import matplotlib.pyplot as plt
 
 
@@ -13,24 +12,39 @@ pd.set_option('display.max_columns', None)  # or 1000
 pd.set_option('display.max_rows', None)  # or 1000
 pd.set_option('display.max_colwidth', -1)  # or 199
 
-date = "2019-07-28"
+readin_date = "2019-07-28"
 
 ## Approach 2 Cumsum filter and getEvents from Marcos to label the sides of the bet
 ## then we use a ML model to learn the sides of the bet
 ## first consider EURNZD
 
-closes  = pd.read_pickle("scripts/research/EURNZD_USDCHF_Cointegration/EURNZD_USDCHF.pkl")
+
+## only "2019-07-28" sample
+#closes = pd.read_pickle("scripts/research/EURNZD_USDCHF_Cointegration/EURNZD_USDCHF.pkl")
+
+## full data from source latest
+closes = pd.read_pickle("data/source_latest_EURNZD_USDCHF.pkl")
 
 
+'''
+closes['day'] = closes.index.day
+print(len(closes['2019-07-29 00:00:00':'2019-07-29 23:55:00']))
+print()
+print(closes.groupby(['day']).agg(['count']))
+print("closes row count ", len(closes))
+print("closes is nan ", closes.isna().any())
+
+'''
 ## TODO resample to dt mins
-dt = '30T'
-
-
+dt = '1T'
 closes = closes.resample(dt).last()
 
 closes.index = pd.to_datetime(closes.index, dayfirst=True)
 
+
 closes['ratio'] = closes['EURNZD 4. close']/closes['USDCHF 4. close']
+
+
 
 ## get tEvents according to ratio
 h=0.0001
@@ -86,8 +100,8 @@ labelPlot['bin_neg'].plot(ax=ax,ls='',marker='v', markersize=7,
                        alpha=0.75, label='sell', color='r')
 
 ax.legend()
-plt.title("%s min max holding period long and short signals for EURNZD"%(maxHold*int(dt[:-1])) + date )
-#plt.savefig("resources/%s min max holding period long and short signals for EURNZD"%(maxHold*int(dt[:-1])) + date )
+plt.title("%s min max holding period long and short signals for EURNZD"%(maxHold*int(dt[:-1])) + readin_date )
+#plt.savefig("resources/%s min max holding period long and short signals for EURNZD"%(maxHold*int(dt[:-1])) + readin_date )
 #plt.show()
 plt.close()
 
@@ -100,15 +114,18 @@ X = closes[['ratio','EURNZD 4. close']]
 labelPlot['bin'] = labelPlot['bin'].fillna(0)
 y = labelPlot['bin']
 
+
 Xy = (pd.merge_asof(X, y,
                     left_index=True, right_index=True,
                     direction='forward',tolerance=pd.Timedelta('2ms')).dropna())
 
-X = Xy.drop('bin',axis=1).values
-y = Xy['bin'].values
+X = X.values
+y = y.values
 
 
 
+
+## Train RNN to predict label
 ## Data normalisation
 
 from sklearn.preprocessing import MinMaxScaler
@@ -150,7 +167,6 @@ model.compile(optimizer = 'adam', loss = 'mean_squared_error'
               , metrics=['accuracy'])
 model.fit(features_set, y_array, epochs = 100, batch_size = 32
           , validation_split=0.33)
-
 
 
 ''' 
