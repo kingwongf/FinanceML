@@ -13,25 +13,55 @@ pd.set_option('display.max_columns', None)  # or 1000
 pd.set_option('display.max_rows', None)  # or 1000
 pd.set_option('display.max_colwidth', -1)  # or 199
 
+
+'''need to run source_latest.py, cointegration_pairs_source_latest.py first '''
 open_closes = pd.read_pickle("data/source_latest.pkl")
+open_closes.index = pd.to_datetime(open_closes.index, dayfirst=True)
+closes = open_closes.filter(regex='close')
+
 
 ratios = pd.read_pickle("data/cointegrated_source_latest.pkl")
+ratios.index = pd.to_datetime(ratios.index, dayfirst=True)
+x1_closes_ratios = [close[2:17] for close in ratios]
+x2_closes_ratios = [close[21:36] for close in ratios]
 
-print(ratios)
+h=0.00001 ## if set too high, tEvents won't be in trgt
 
-h=0.00001
-tEvents = labelling_Marcos.getTEvents(ratios, h)
+cointegrated_tEvents= [labelling_Marcos.getTEvents(ratios[ratio], h) for ratio in ratios.columns]
+#print(len(x_closes_ratios), len(ratios), len(cointegrated_tEvents))
 
-print(len(tEvents))
-'''
+
+
 ## apply triple barriers method to closing prices triggered by tEvents of pair trading ratio
 maxHold = 5 ## dt*maxHold in min
-t1 = labelling_Marcos.addVerticalBarrier(tEvents, closes['EURNZD 4. close'], numDays=maxHold)
+x1_cointegrated_t1 = [labelling_Marcos.addVerticalBarrier(cointegrated_tEvents[i], open_closes[x1_closes_ratios[i]],
+                                                        numDays=maxHold) for i in range(len(x1_closes_ratios))]
+
+x2_cointegrated_t1 = [labelling_Marcos.addVerticalBarrier(cointegrated_tEvents[i], open_closes[x2_closes_ratios[i]],
+                                                       numDays=maxHold) for i in range(len(x2_closes_ratios))]
 minRet = 0.001
 ptSl= [1,1]         ## upper barrier = trgt*ptSl[0] and lower barrier = trgt*ptSl[1]
-trgt = labelling_Marcos.getDailyVol(closes['EURNZD 4. close'])  ## unit width of the horizon barrier
 
 
+
+x1_trgt = [labelling_Marcos.getDailyVol(open_closes[close]) for close in x1_closes_ratios]
+x2_trgt = [labelling_Marcos.getDailyVol(open_closes[close]) for close in x2_closes_ratios]
+
+print(cointegrated_tEvents[0], x1_trgt[0])
+
+
+x1_events = labelling_Marcos.getEvents(open_closes[x1_closes_ratios[0]], cointegrated_tEvents[0],
+                                        ptSl, x1_trgt[0], minRet, 1,x1_cointegrated_t1[0])
+
+
+
+x1_events = [labelling_Marcos.getEvents(open_closes[x1_closes_ratios[i]], cointegrated_tEvents[i],
+                                        ptSl, x1_trgt[i], minRet, 1,x1_cointegrated_t1[i]) for i in range(len(x1_closes_ratios))]
+
+x2_events = [labelling_Marcos.getEvents(open_closes[x2_closes_ratios[i]], cointegrated_tEvents[i],
+                                        ptSl, x2_trgt[i], minRet, 1, x2_cointegrated_t1[i]) for i in range(len(x2_closes_ratios))]
+
+'''
 events = labelling_Marcos.getEvents(closes['EURNZD 4. close'], tEvents, ptSl, trgt, minRet, 1, t1)
 labels = labelling_Marcos.getBins(events, closes['EURNZD 4. close'])
 

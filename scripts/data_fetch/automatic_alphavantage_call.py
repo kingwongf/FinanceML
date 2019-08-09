@@ -22,7 +22,7 @@ keys_file = open("resources/keys.txt", "r")
 for lines in keys_file:
     keys = lines.split(",")
 
-key = keys[1]
+key = keys[2]
 
 
 '''supported values are '1min', '5min', '15min', '30min', '60min', 'daily', 'weekly', 'monthly' '''
