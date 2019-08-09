@@ -61,6 +61,16 @@ x1_events = [labelling_Marcos.getEvents(open_closes[x1_closes_ratios[i]], cointe
 x2_events = [labelling_Marcos.getEvents(open_closes[x2_closes_ratios[i]], cointegrated_tEvents[i],
                                         ptSl, x2_trgt[i], minRet, 1, x2_cointegrated_t1[i]) for i in range(len(x2_closes_ratios))]
 
+x1_labels = [labelling_Marcos.getBins(x1_events[i], open_closes[x1_closes_ratios[i]]) for i in range(len(x1_closes_ratios))]
+
+x2_labels = [labelling_Marcos.getBins(x2_events[i], open_closes[x2_closes_ratios[i]]) for i in range(len(x2_closes_ratios))]
+
+## TODO: need to figure out how to handle multiple labels
+
+
+
+
+
 '''
 events = labelling_Marcos.getEvents(closes['EURNZD 4. close'], tEvents, ptSl, trgt, minRet, 1, t1)
 labels = labelling_Marcos.getBins(events, closes['EURNZD 4. close'])
