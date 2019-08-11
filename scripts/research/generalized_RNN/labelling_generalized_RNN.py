@@ -2,6 +2,7 @@ import numpy as np
 import sklearn.covariance
 from datetime import date
 import pandas as pd
+import pickle
 import statsmodels.api as sm
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -14,10 +15,9 @@ pd.set_option('display.max_rows', None)  # or 1000
 pd.set_option('display.max_colwidth', -1)  # or 199
 
 
-'''need to run source_latest.py, cointegration_pairs_source_latest.py first '''
+'''need to run source_latest.py, cointegration_pairs_closes_source_latest.py first '''
 open_closes = pd.read_pickle("data/source_latest.pkl")
 open_closes.index = pd.to_datetime(open_closes.index, dayfirst=True)
-closes = open_closes.filter(regex='close')
 
 
 ratios = pd.read_pickle("data/cointegrated_source_latest.pkl")
@@ -25,7 +25,7 @@ ratios.index = pd.to_datetime(ratios.index, dayfirst=True)
 x1_closes_ratios = [close[2:17] for close in ratios]
 x2_closes_ratios = [close[21:36] for close in ratios]
 
-h=0.00001 ## if set too high, tEvents won't be in trgt
+h=0.0001 ## if set too high, tEvents won't be in trgt
 
 cointegrated_tEvents= [labelling_Marcos.getTEvents(ratios[ratio], h) for ratio in ratios.columns]
 #print(len(x_closes_ratios), len(ratios), len(cointegrated_tEvents))
@@ -47,11 +47,6 @@ ptSl= [1,1]         ## upper barrier = trgt*ptSl[0] and lower barrier = trgt*ptS
 x1_trgt = [labelling_Marcos.getDailyVol(open_closes[close]) for close in x1_closes_ratios]
 x2_trgt = [labelling_Marcos.getDailyVol(open_closes[close]) for close in x2_closes_ratios]
 
-print(cointegrated_tEvents[0], x1_trgt[0])
-
-
-x1_events = labelling_Marcos.getEvents(open_closes[x1_closes_ratios[0]], cointegrated_tEvents[0],
-                                        ptSl, x1_trgt[0], minRet, 1,x1_cointegrated_t1[0])
 
 
 
@@ -61,9 +56,15 @@ x1_events = [labelling_Marcos.getEvents(open_closes[x1_closes_ratios[i]], cointe
 x2_events = [labelling_Marcos.getEvents(open_closes[x2_closes_ratios[i]], cointegrated_tEvents[i],
                                         ptSl, x2_trgt[i], minRet, 1, x2_cointegrated_t1[i]) for i in range(len(x2_closes_ratios))]
 
-x1_labels = [labelling_Marcos.getBins(x1_events[i], open_closes[x1_closes_ratios[i]]) for i in range(len(x1_closes_ratios))]
+x1_labels = [labelling_Marcos.getBins(x1_events[i], open_closes[x1_closes_ratios[i]].sort_index()) for i in range(len(x1_closes_ratios))]
 
-x2_labels = [labelling_Marcos.getBins(x2_events[i], open_closes[x2_closes_ratios[i]]) for i in range(len(x2_closes_ratios))]
+x2_labels = [labelling_Marcos.getBins(x2_events[i], open_closes[x2_closes_ratios[i]].sort_index()) for i in range(len(x2_closes_ratios))]
+
+
+pickle.dump(x1_labels, open("data/generalized_RNN/x1_labels.pkl", 'wb'))
+pickle.dump(x2_labels, open("data/generalized_RNN/x2_labels.pkl", 'wb'))
+
+
 
 ## TODO: need to figure out how to handle multiple labels
 
@@ -128,7 +129,7 @@ from tensorflow.keras.layers import Dropout
 
 model = Sequential()
 
-model.add(LSTM(units=50, return_sequences=True, input_shape=(features_set.shape[1], X_array.shape[1])))
+model.add(LSTM(units=50, .return_sequences=True, input_shape=(features_set.shape[1], X_array.shape[1])))
 model.add(Dropout(0.2))
 model.add(LSTM(units=100, return_sequences=True))
 model.add(Dropout(0.2))

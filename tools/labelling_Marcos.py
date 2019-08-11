@@ -76,7 +76,7 @@ def addVerticalBarrier(tEvents, close, numDays=1):
 
 
 
-def getEvents(close, tEvents, ptSl, trgt, minRet, numThreads, t1=False, side=None):
+def getEvents(close, tEvents, ptSl, trgt, minRet, numThreads=24, t1=False, side=None):
     #1) get target
     trgt=trgt.loc[tEvents]
     trgt=trgt[trgt>minRet] # minRet
