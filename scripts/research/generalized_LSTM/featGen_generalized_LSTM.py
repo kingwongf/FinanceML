@@ -21,7 +21,7 @@ ratios = pd.read_pickle("data/cointegrated_source_latest.pkl")
 ratios.index = pd.to_datetime(ratios.index, dayfirst=True)
 
 ## TODO feature fractional differentiated closes
-ffd_featGen = pd.read_pickle("data/generalized_RNN/ffd_featGen_0.0001.pkl")
+ffd_featGen = pd.read_pickle("data/generalized_LSTM/ffd_featGen_0.0001.pkl")
 ffd_featGen.index = pd.to_datetime(ffd_featGen.index, dayfirst=True)
 ffd_featGen.to_csv("data/test_ffd_feat.csv")
 
@@ -52,7 +52,7 @@ X = reduce(lambda X,x:pd.merge_asof(X.dropna().sort_index(), x.sort_index(), lef
 
 print(X.shape)
 
-X.to_pickle("data/generalized_RNN/feat_generalized_RNN.pkl")
+X.to_pickle("data/generalized_LSTM/feat_generalized_LSTM.pkl")
 #print(X.sort_index())
 #print("non Nan count /n", X.size)
 #print("Nan count /n", X.isna().sum())

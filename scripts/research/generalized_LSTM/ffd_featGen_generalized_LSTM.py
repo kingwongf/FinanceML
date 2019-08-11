@@ -49,8 +49,8 @@ for i,ticker in enumerate(tickers):
                                  direction='forward', tolerance=pd.Timedelta('2ms')
                                  )
 ffd_feat = ffd_feat.add_prefix("frac_diff ")
-ffd_feat.to_pickle("data/generalized_RNN/ffd_featGen_" +str(tau)+".pkl")
-ffd_feat.to_csv("data/generalized_RNN/ffd_featGen_" +str(tau)+".csv")
+ffd_feat.to_pickle("data/generalized_LSTM/ffd_featGen_" +str(tau)+".pkl")
+ffd_feat.to_csv("data/generalized_LSTM/ffd_featGen_" +str(tau)+".csv")
 end = time.time()
 print(end - start)
 
@@ -59,7 +59,7 @@ ax2 = ax.twinx()
 ax2.plot(ffd_feat, 'g')
 ax.plot(closes['EURGBP 4. close'])
 plt.show()
-#pickle.dump(res, open("data/generalized_RNN/list_comp_d_ffd_featGen.pkl", 'wb'))
+#pickle.dump(res, open("data/generalized_LSTM/list_comp_d_ffd_featGen.pkl", 'wb'))
 
 #tup = [(open_closes['AUDCAD 4. close'], x/100) for x in range(0,100)]
 
@@ -70,7 +70,7 @@ plt.show()
 ## took 1hr 47min and don't know how to write
 with Pool(multiprocessing.cpu_count()) as p:
     res = p.starmap(FFD.min_get_optimal_ffd, product(li_closes, ds))
-pickle.dump(res, open("data/generalized_RNN/d_ffd_featGen.pkl", 'wb'))
+pickle.dump(res, open("data/generalized_LSTM/d_ffd_featGen.pkl", 'wb'))
 '''
 
 

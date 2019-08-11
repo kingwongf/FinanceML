@@ -61,8 +61,8 @@ x1_labels = [labelling_Marcos.getBins(x1_events[i], open_closes[x1_closes_ratios
 x2_labels = [labelling_Marcos.getBins(x2_events[i], open_closes[x2_closes_ratios[i]].sort_index()) for i in range(len(x2_closes_ratios))]
 
 
-pickle.dump(x1_labels, open("data/generalized_RNN/x1_labels.pkl", 'wb'))
-pickle.dump(x2_labels, open("data/generalized_RNN/x2_labels.pkl", 'wb'))
+pickle.dump(x1_labels, open("data/generalized_LSTM/x1_labels.pkl", 'wb'))
+pickle.dump(x2_labels, open("data/generalized_LSTM/x2_labels.pkl", 'wb'))
 
 
 
