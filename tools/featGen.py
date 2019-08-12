@@ -20,7 +20,7 @@ def ema(close, span=None, alpha=None):
 def relEMA(fast_ema, slow_ema):
     return fast_ema/ slow_ema
 
-def RSI(close, period):
+def RSI(close, period=14):
     delta = close.diff()
     dUp, dDown = delta.copy(), delta.copy()
     dUp[dUp < 0] = 0
@@ -29,6 +29,8 @@ def RSI(close, period):
     rollDown = dDown.abs().ewm(span=period).mean()
     rsi = rollUp/ rollDown
     RSI = 100.0 - (100.0 / (1.0 + rsi))
+    RSI = RSI.rename('RSI ' + close.name, inplace=True)
+#    print(RSI.name)
     return RSI
 
 def stochRSI(close, period=14):
@@ -38,6 +40,22 @@ def stochRSI(close, period=14):
     K = 100*(rsi - rsiLow)/ (rsiHigh - rsiLow)
     D = K.rolling(3).mean()
     return K, D
+
+def stochRSI_K(close, period=14):
+    rsi = RSI(close, period)
+    rsiLow = rsi.rolling(period).min()
+    rsiHigh = rsi.rolling(period).max()
+    K = 100*(rsi - rsiLow)/ (rsiHigh - rsiLow)
+    D = K.rolling(3).mean()
+    return K
+
+def stochRSI_D(close, period=14):
+    rsi = RSI(close, period)
+    rsiLow = rsi.rolling(period).min()
+    rsiHigh = rsi.rolling(period).max()
+    K = 100*(rsi - rsiLow)/ (rsiHigh - rsiLow)
+    D = K.rolling(3).mean()
+    return D
 
 def MACD(close):
     shortEma = close.ewm(adjust=True, alpha=0.15).mean()

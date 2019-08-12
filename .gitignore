@@ -20,7 +20,9 @@ keys.txt
 *.idea/
 *.png
 *.pkl
-
+scripts/lesson1.py
+.vscode/
+.gitsecret/
 
 *.so
 *.csv

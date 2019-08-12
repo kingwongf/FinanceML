@@ -29,7 +29,7 @@ tickers = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD'
 
 interval = "1min"
 ## range of dates
-numdays=13
+numdays=17
 
 base = datetime.datetime.today()
 datelist = [base - datetime.timedelta(days=x) for x in range(numdays)]
