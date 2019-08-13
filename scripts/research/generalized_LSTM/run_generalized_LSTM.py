@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
+import collections
 
 X = pd.read_pickle("data/generalized_LSTM/feat_generalized_LSTM.pkl")
 
@@ -14,10 +15,13 @@ ratios = pd.read_pickle("data/cointegrated_source_latest.pkl")
 ratios.index = pd.to_datetime(ratios.index, dayfirst=True)
 y1_closes_names = [close[2:17] for close in ratios]
 
-
+for i,label in enumerate(y_1):
+    print(len(y_1), len(y1_closes_names))
+    print(i, y1_closes_names[i])
+    print(collections.Counter(label['bin']['2019-08-01 00:00:00':]))
 
 ### TODO:  test with first fx, 'EURTRY 4. close'
-###        in the x1_closes_ratios as it has most labels (2951)
+###in the x1_closes_ratios as it has most labels (2951)
 
 
 
@@ -30,6 +34,8 @@ Xy['bin'] = Xy['bin'].fillna(0)
 y = Xy['bin'].values
 X = Xy.drop(columns=['bin']).values
 
+
+
 '''
 from sklearn.model_selection import TimeSeriesSplit
 
@@ -38,8 +44,8 @@ for train_index, test_index in tscv.split(X):
     print("TRAIN:", train_index, "TEST:", test_index)
     X_train, X_test = X[train_index], X[test_index]
     y_train, y_test = y[train_index], y[test_index]
-'''
 
+'''
 print(len(Xy))
 X_train, X_test = X[:idx_split], X[idx_split:]
 y_train, y_test = y[:idx_split], y[idx_split:]
@@ -88,15 +94,4 @@ model.fit(features_set, train_y_array, epochs = 1000, batch_size = 32
 
 model.save("scripts/research/generalized_LSTM/generalized_LSTM.h5")
 
-
-
-test_predictions = model.predict(test_X_array)
-
-test_predictions = scaler.inverse_transform(test_predictions)
-
-plt.figure(figsize=(10,6))
-plt.plot(X['EURTRY 4. close']['2019-08-01 00:00:00':'2019-08-08 02:18:00'], color='blue', label='EURTRY')
-plt.plot(test_predictions, color='red', label='signals')
-plt.title('test LSTM')
-plt.legend()
-plt.show()
+'''
