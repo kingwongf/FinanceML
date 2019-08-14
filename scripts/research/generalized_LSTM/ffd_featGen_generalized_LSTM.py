@@ -54,11 +54,11 @@ ffd_feat.to_csv("data/generalized_LSTM/ffd_featGen_" +str(tau)+".csv")
 end = time.time()
 print(end - start)
 
-f, ax = plt.subplots(figsize=(11,5))
-ax2 = ax.twinx()
-ax2.plot(ffd_feat, 'g')
-ax.plot(closes['EURGBP 4. close'])
-plt.show()
+#f, ax = plt.subplots(figsize=(11,5))
+#ax2 = ax.twinx()
+#ax2.plot(ffd_feat, 'g')
+#ax.plot(closes['EURGBP 4. close'])
+#plt.show()
 #pickle.dump(res, open("data/generalized_LSTM/list_comp_d_ffd_featGen.pkl", 'wb'))
 
 #tup = [(open_closes['AUDCAD 4. close'], x/100) for x in range(0,100)]

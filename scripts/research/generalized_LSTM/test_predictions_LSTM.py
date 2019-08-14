@@ -76,6 +76,3 @@ plt.title('test LSTM')
 plt.legend()
 plt.show()
 
-pickle.dump(test_predictions, open("data/generalized_LSTM/test_predicitions_generalized_LSTM.pkl", 'wb'))
-test_predictions = scaler.inverse_transform(test_predictions)
-
