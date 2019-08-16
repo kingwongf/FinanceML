@@ -6,7 +6,7 @@ import collections
 
 X = pd.read_pickle("data/generalized_LSTM/feat_generalized_LSTM.pkl")
 
-y_1 = pickle.load(open("data/generalized_LSTM/x1_labels.pkl", 'rb'))
+y_1 = pickle.load(open("data/generalized_LSTM/labelling/x1_labels.pkl", 'rb'))
 
 #print(y_1)
 
@@ -94,4 +94,3 @@ model.fit(features_set, train_y_array, epochs = 1000, batch_size = 32
 
 model.save("scripts/research/generalized_LSTM/generalized_LSTM.h5")
 
-'''

@@ -47,7 +47,7 @@ ptSl= [1,1]         ## upper barrier = trgt*ptSl[0] and lower barrier = trgt*ptS
 x1_trgt = [labelling_Marcos.getDailyVol(open_closes[close]) for close in x1_closes_ratios]
 x2_trgt = [labelling_Marcos.getDailyVol(open_closes[close]) for close in x2_closes_ratios]
 
-
+pd.DataFrame(x1_cointegrated_t1[0]).to_csv("data/generalized_LSTM/labelling/x1_t1.csv")
 
 
 x1_events = [labelling_Marcos.getEvents(open_closes[x1_closes_ratios[i]], cointegrated_tEvents[i],
@@ -61,14 +61,18 @@ x1_labels = [labelling_Marcos.getBins(x1_events[i], open_closes[x1_closes_ratios
 x2_labels = [labelling_Marcos.getBins(x2_events[i], open_closes[x2_closes_ratios[i]].sort_index()) for i in range(len(x2_closes_ratios))]
 
 
-print(len(x1_closes_ratios), len(x1_labels))
-pickle.dump(x1_labels, open("data/generalized_LSTM/x1_labels.pkl", 'wb'))
-pickle.dump(x2_labels, open("data/generalized_LSTM/x2_labels.pkl", 'wb'))
+#print(len(x1_closes_ratios), len(x1_labels))
+pickle.dump(x1_trgt, open("data/generalized_LSTM/labelling/x1_trgt.pkl", 'wb'))
+pickle.dump(x2_trgt, open("data/generalized_LSTM/labelling/x2_trgt.pkl", 'wb'))
+pickle.dump(x1_events, open("data/generalized_LSTM/labelling/x1_events.pkl", 'wb'))
+pickle.dump(x2_events, open("data/generalized_LSTM/labelling/x2_events.pkl", 'wb'))
+pickle.dump(x1_labels, open("data/generalized_LSTM/labelling/x1_labels.pkl", 'wb'))
+pickle.dump(x2_labels, open("data/generalized_LSTM/labelling/x2_labels.pkl", 'wb'))
 
 ## TODO: plot to check if they are correctly labelled
 
 #y_1 = pickle.load(open("data/generalized_LSTM/x1_labels.pkl", 'rb'))
-
+'''
 x1_labelPlot = pd.DataFrame(open_closes[x1_closes_ratios], index=open_closes.index)
 print(x1_labelPlot.columns)
 for i,label in enumerate(x1_labels):
@@ -78,7 +82,7 @@ for i,label in enumerate(x1_labels):
 #                  left_index=True, right_index=True, direction='forward'
 #                   ,tolerance=pd.Timedelta('2ms'))
 
-
+'''
 
 
 
