@@ -16,8 +16,8 @@ tickers = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD'
             ,'USDTRY', 'USDZAR', 'ZARJPY']
 
 
-
-keys_file = open("resources/keys.txt", "r")
+## TODO rename all dir to explicit because bash/ terminal doesn't sepcify local dir
+keys_file = open("/Users/kingf.wong/Development/FinanceML/resources/keys.txt", "r")
 
 for lines in keys_file:
     keys = lines.split(",")
@@ -31,7 +31,7 @@ key = keys[2]
 
 interval = "1min"
 today = date.today()
-today_dir = "data/" + str(today)
+today_dir = "/Users/kingf.wong/Development/FinanceML/data/" + str(today)
 os.mkdir(today_dir)
 
 for i,ticker in enumerate(tickers):
