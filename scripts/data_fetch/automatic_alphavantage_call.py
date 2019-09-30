@@ -31,7 +31,7 @@ key = keys[2]
 
 interval = "1min"
 today = date.today()
-today_dir = "/Users/kingf.wong/Development/FinanceML/data/" + str(today)
+today_dir = "/Users/kingf.wong/Development/FinanceML/data/fx_prices/" + str(today)
 os.mkdir(today_dir)
 
 for i,ticker in enumerate(tickers):

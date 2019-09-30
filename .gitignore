@@ -27,6 +27,7 @@ scripts/lesson1.py
 *.so
 *.csv
 *.DS_Store
+*.app
 
 # Packages #
 ############
