@@ -79,6 +79,9 @@ def maxret(close, period='1d'):
     max_ret = ret.rolling(period, min_periods=1).max()
     return max_ret
 
+def ret(close, n=1):
+    ret_ = np.log(close).diff(n)
+    return ret_
 #K, D = stochRSI(price['4. close'])
 
 #print(MACD(price['4. close']))

@@ -51,6 +51,9 @@ print("Elapsed time during non parallel in seconds:",
                                          t2_stop-t2_start)
 
 # print(mom1d['2019-09-19 06:38:00':'2019-09-19 06:47:00'], non_parall_mom1d['2019-09-19 06:38:00':'2019-09-19 06:47:00'])
+
+
+## TODO without swifter/ parallerize
 '''
 
 ## TODO momentum and change of momentun
@@ -120,5 +123,3 @@ closes['dayofweek'] = closes.index.dayofweek
 
 feats.extend(closes['dayofweek'].to_frame())
 '''
-
-print(feats)
