@@ -31,7 +31,7 @@ tickers = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD'
             ,'USDTRY', 'USDZAR', 'ZARJPY']
 
 interval = "1min"
-fx_loc = "data/fx_prices/"
+fx_loc = "data/fx_prices"
 today = date.today()
 date_parser = pd.to_datetime
 
@@ -45,9 +45,7 @@ def read_df_format_datetime(files, root):
     return dfs
 
 
-
-
-source_latest = reduce(lambda X,x: X.sort_index().append(x.sort_index()), [read_df_format_datetime(files,root) for root, _, files in os.walk(fx_loc) if '.DS_Store' not in files])
+source_latest = reduce(lambda X,x: X.sort_index().append(x.sort_index()), [read_df_format_datetime(files,root) for root, _, files in os.walk(fx_loc) if '.DS_Store' not in files if len(files)!=0])
 source_latest = source_latest.loc[~source_latest.index.duplicated(keep='first')].sort_index().interpolate()
 
 source_latest.to_pickle("data/open_closes_source_latest_%s.pkl"%today)

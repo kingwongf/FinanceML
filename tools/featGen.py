@@ -63,8 +63,21 @@ def MACD(close):
     macd = shortEma - longEma
     return macd
 
+def momentum(close, n=1, freq='D'):
+#     shifted_idx = close.index.shift(n, freq='D')
+    prev_close = close.shift(n, freq=freq)
+    mom = close/prev_close -1
+    return mom
 
+def retvol(close, period='1d'):
+    ret = np.log(close).diff()
+    vol = ret.rolling(period, min_periods=1).std()**2
+    return vol
 
+def maxret(close, period='1d'):
+    ret = np.log(close).diff()
+    max_ret = ret.rolling(period, min_periods=1).max()
+    return max_ret
 
 #K, D = stochRSI(price['4. close'])
 

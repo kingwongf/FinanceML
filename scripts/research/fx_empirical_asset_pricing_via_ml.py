@@ -4,6 +4,7 @@ from datetime import date
 import pandas as pd
 from itertools import chain
 from functools import reduce
+import swifter
 import seaborn as sns
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
