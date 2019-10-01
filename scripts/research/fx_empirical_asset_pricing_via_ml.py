@@ -4,6 +4,7 @@ from datetime import date
 import pandas as pd
 from itertools import chain
 from functools import reduce
+from time import process_time
 import swifter
 import seaborn as sns
 import statsmodels.api as sm
@@ -35,6 +36,22 @@ closes = source_latest_open_close[[close for close in source_latest_open_close.c
 
 feats = []
 
+
+t1_start = process_time()
+mom1d = closes.swifter.apply(featGen.momentum, axis=0, args=(1,'D')).fillna(method='ffill').add_prefix('mom1d_')
+t1_stop = process_time()
+
+t2_start = process_time()
+non_parall_mom1d = closes.apply(featGen.momentum, axis=0, args=(1,'D')).fillna(method='ffill').add_prefix('mom1d_')
+t2_stop = process_time()
+
+print("Elapsed time during swifter in seconds:",
+                                         t1_stop-t1_start)
+print("Elapsed time during non parallel in seconds:",
+                                         t2_stop-t2_start)
+
+# print(mom1d['2019-09-19 06:38:00':'2019-09-19 06:47:00'], non_parall_mom1d['2019-09-19 06:38:00':'2019-09-19 06:47:00'])
+'''
 
 ## TODO momentum and change of momentun
 mom1d = closes.apply(featGen.momentum, axis=0, args=(1,'D')).fillna(method='ffill').add_prefix('mom1d_')
@@ -102,6 +119,6 @@ feats.extend([maxret1d, maxret5d])
 closes['dayofweek'] = closes.index.dayofweek
 
 feats.extend(closes['dayofweek'].to_frame())
-
+'''
 
 print(feats)
