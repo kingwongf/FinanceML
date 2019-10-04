@@ -1,18 +1,9 @@
-import numpy as np
-import sklearn.covariance
-from datetime import date
 import pandas as pd
-from itertools import chain
-from functools import reduce
-from time import process_time
-import swifter
-import seaborn as sns
-import statsmodels.api as sm
-import matplotlib.pyplot as plt
-import matplotlib.ticker as matplotticker
 from tools import featGen
-import tools.featGen
-from tools import clean_weekends
+import pandas as pd
+
+from tools import featGen
+
 print(pd.__version__)
 
 pd.set_option('display.max_columns', None)  # or 1000
@@ -38,6 +29,7 @@ def feat_ticker(close_df, closes, ticker, ticker_close):
     '''
     D = 1440
     H = 60
+    min = 1
 
     mom = close_df.swifter.apply(featGen.momentum, axis=0, args=(D,)).fillna(method='ffill')
 
@@ -165,7 +157,7 @@ def feat_ticker(close_df, closes, ticker, ticker_close):
 
     ## TODO add label/ target, maybe change func to parse in the future
 
-    feat_df['target'] = close_df.swifter.apply(featGen.ret, n=H).shift(-H).fillna(method='ffill')
+    feat_df['target'] = close_df.swifter.apply(featGen.ret, n=min).shift(-min).fillna(method='ffill')
 
     # print('feat index', feat_df.index)
 

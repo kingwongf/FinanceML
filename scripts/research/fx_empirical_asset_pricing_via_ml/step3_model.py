@@ -1,27 +1,11 @@
 import numpy as np
-import sklearn.covariance
-import datetime
-from datetime import date
-import os
-from functools import reduce
 import pandas as pd
-
-import numpy as np
-
 import tensorflow as tf
-
+from keras import backend as K
+from sklearn.model_selection import train_test_split
 from tensorflow import feature_column
 from tensorflow.keras import layers
-from sklearn.model_selection import train_test_split
-from tools import step2_feat_swifter_tools
-from time import process_time
-import seaborn as sns
-import statsmodels.api as sm
-import matplotlib.pyplot as plt
 
-
-from tools import featGen
-from tools import labelling_Marcos
 pd.set_option('display.max_columns', None)  # or 1000
 pd.set_option('display.max_rows', None)  # or 1000
 pd.set_option('display.max_colwidth', -1)  # or 199
@@ -69,7 +53,7 @@ test_ds = df_to_dataset(test, shuffle=False, batch_size=batch_size)
 
 ## TODO customize below
 numeric_cols = Xy.columns.tolist()
-numeric_cols.remove('ticker')
+numeric_cols = [e for e in numeric_cols if e not in ('ticker', 'target')]
 
 feature_columns = []
 
@@ -78,7 +62,7 @@ for header in numeric_cols:
   feature_columns.append(feature_column.numeric_column(header, normalizer_fn=lambda x: (x - 3.0) / 4.2))
 
 # indicator cols
-thal = feature_column.categorical_column_with_vocabulary_list('ticker', tickers)
+thal = feature_column.categorical_column_with_vocabulary_list('ticker', Xy.ticker.unique().tolist())
 # thal_one_hot = feature_column.indicator_column(thal)
 # feature_columns.append(thal_one_hot)
 
@@ -88,21 +72,33 @@ feature_columns.append(thal_embedding)
 
 feature_layer = tf.keras.layers.DenseFeatures(feature_columns)
 
+callback = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=10)
+
+def coeff_determination(y_true, y_pred):
+    SS_res =  K.sum(K.square( y_true-y_pred ))
+    SS_tot = K.sum(K.square( y_true - K.mean(y_true) ) )
+    return ( 1 - SS_res/(SS_tot + K.epsilon()) )
+
 
 model = tf.keras.Sequential([
   feature_layer,
   layers.Dense(128, activation='relu'),
+  layers.Dropout(0.5),
+  layers.Dense(256, activation='relu'),
+  layers.Dropout(0.5),
   layers.Dense(128, activation='relu'),
-  layers.Dense(1, activation='sigmoid')
+  layers.Dense(64, activation='relu'),
+  layers.Dense(1, activation='relu')
 ])
 
 model.compile(optimizer='adam',
               loss='binary_crossentropy',
-              metrics=['accuracy'])
+              metrics=[coeff_determination, 'accuracy'])
 
 model.fit(train_ds,
           validation_data=val_ds,
-          epochs=5)
+          epochs=100, callbacks=[callback])
 
-loss, accuracy = model.evaluate(test_ds)
+loss, coeff_determination, accuracy = model.evaluate(test_ds)
+print("R^2", coeff_determination)
 print("Accuracy", accuracy)

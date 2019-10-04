@@ -1,19 +1,11 @@
-import numpy as np
-import sklearn.covariance
-import datetime
 from datetime import date
 import os
 from functools import reduce
+
 import pandas as pd
+
 from tools import step2_feat_swifter_tools
-from time import process_time
-import seaborn as sns
-import statsmodels.api as sm
-import matplotlib.pyplot as plt
 
-
-from tools import featGen
-from tools import labelling_Marcos
 pd.set_option('display.max_columns', None)  # or 1000
 pd.set_option('display.max_rows', None)  # or 1000
 pd.set_option('display.max_colwidth', -1)  # or 199
