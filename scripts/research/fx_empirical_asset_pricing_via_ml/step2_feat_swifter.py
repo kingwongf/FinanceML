@@ -19,33 +19,12 @@ pd.set_option('display.max_columns', None)  # or 1000
 pd.set_option('display.max_rows', None)  # or 1000
 pd.set_option('display.max_colwidth', -1)  # or 199
 
-tickers = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD'
-            ,'CADCHF', 'CADJPY', 'EURAUD', 'EURCAD', 'EURCHF'
-            ,'EURGBP', 'EURJPY', 'EURNOK', 'EURNZD', 'EURSEK'
-            ,'EURTRY', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF'
-            ,'GBPJPY', 'GBPNZD', 'GBPUSD', 'NZDCAD', 'NZDCHF'
-            ,'NZDJPY', 'NZDUSD', 'TRYJPY', 'USDCAD', 'USDCHF'
-            ,'USDCNH', 'USDJPY', 'USDMXN', 'USDNOK', 'USDSEK'
-            ,'USDTRY', 'USDZAR', 'ZARJPY']
 
-interval = "1min"
-today = date.today()
-
-source_latest_open_close = pd.read_pickle("data/open_closes_source_latest_2019-10-01.pkl").sort_index()
-closes = source_latest_open_close[[close for close in source_latest_open_close.columns.tolist() if "close" in close]]
-
-feats = []
-
-
-t1_start = process_time()
-
-
-# print(mom1d['2019-09-19 06:38:00':'2019-09-19 06:47:00'], non_parall_mom1d['2019-09-19 06:38:00':'2019-09-19 06:47:00'])
 
 ## TODO momentum and change of momentun
 
 
-def mom(close_df, closes, ticker, ticker_close):
+def feat_ticker(close_df, closes, ticker, ticker_close):
 
     ''' close_df refers to one ticker/ pair dataframe with only one columnm, close_df[ticker_close] '''
 
@@ -78,7 +57,7 @@ def mom(close_df, closes, ticker, ticker_close):
                                                 closes[[col for col in closes.columns.tolist() if
                                                         ticker[:3] in col.name[:3]]]
 
-    print(ind_currencies_top.columns, ind_currencies_bottom.columns)
+    # print(ind_currencies_top.columns, ind_currencies_bottom.columns)
 
     ind_mom = ind_currencies_top.swifter.apply(featGen.momentum, axis=0, args=(15, 'min'))\
         .fillna(method='ffill').mean(axis=1, skipna=True).rename('top_ind_mom15min')
@@ -160,8 +139,33 @@ def mom(close_df, closes, ticker, ticker_close):
 
     close_df['1h_pred_ret'] = closes.swifter.apply(featGen.ret, n=60).shift(-60).fillna(method='ffill')
 
+    return close_df
+
 
 '''
+tickers = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD'
+            ,'CADCHF', 'CADJPY', 'EURAUD', 'EURCAD', 'EURCHF'
+            ,'EURGBP', 'EURJPY', 'EURNOK', 'EURNZD', 'EURSEK'
+            ,'EURTRY', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF'
+            ,'GBPJPY', 'GBPNZD', 'GBPUSD', 'NZDCAD', 'NZDCHF'
+            ,'NZDJPY', 'NZDUSD', 'TRYJPY', 'USDCAD', 'USDCHF'
+            ,'USDCNH', 'USDJPY', 'USDMXN', 'USDNOK', 'USDSEK'
+            ,'USDTRY', 'USDZAR', 'ZARJPY']
+
+interval = "1min"
+today = date.today()
+
+source_latest_open_close = pd.read_pickle("data/open_closes_source_latest_2019-10-01.pkl").sort_index()
+closes = source_latest_open_close[[close for close in source_latest_open_close.columns.tolist() if "close" in close]]
+
+feats = []
+
+
+t1_start = process_time()
+
+
+# print(mom1d['2019-09-19 06:38:00':'2019-09-19 06:47:00'], non_parall_mom1d['2019-09-19 06:38:00':'2019-09-19 06:47:00'])
+
 mom1d = closes.swifter.apply(featGen.momentum, axis=0, args=(1,'D')).fillna(method='ffill').add_prefix('mom1d_')
 mom5d = closes.swifter.apply(featGen.momentum, axis=0, args=(5,'D')).fillna(method='ffill').add_prefix('mom5d_')
 mom10d = closes.swifter.apply(featGen.momentum, axis=0, args=(10,'D')).fillna(method='ffill').add_prefix('mom10d_')
@@ -183,7 +187,7 @@ chmom10h= mom10h.diff(periods=1, axis=0).add_prefix('chmom10h_')
 
 chmom30min= mom30min.diff(periods=1, axis=0).add_prefix('chmom30min_')
 chmom15min= mom15min.diff(periods=1, axis=0).add_prefix('chmom15min_')
-'''
+
 def set_multiColIndex(df, feat):
     df.columns = pd.MultiIndex.from_product([df.columns, [feat]])
     return df
@@ -256,3 +260,4 @@ for ticker in tickers:
     ticker_Xy = pd.merge_asof(X_feats.sort_index(), y.sort_index(),
                         left_index=True, right_index=True, direction='forward',tolerance=pd.Timedelta('2ms'))
     ticker_Xy['ticker'] = ticker
+'''

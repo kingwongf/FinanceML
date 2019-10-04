@@ -5,6 +5,14 @@ from datetime import date
 import os
 from functools import reduce
 import pandas as pd
+
+import numpy as np
+
+import tensorflow as tf
+
+from tensorflow import feature_column
+from tensorflow.keras import layers
+from sklearn.model_selection import train_test_split
 from tools import step2_feat_swifter_tools
 from time import process_time
 import seaborn as sns
@@ -19,9 +27,6 @@ pd.set_option('display.max_rows', None)  # or 1000
 pd.set_option('display.max_colwidth', -1)  # or 199
 
 
-''' merge dataframes of different dates to have one large dataframe '''
-
-
 tickers = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD'
             ,'CADCHF', 'CADJPY', 'EURAUD', 'EURCAD', 'EURCHF'
             ,'EURGBP', 'EURJPY', 'EURNOK', 'EURNZD', 'EURSEK'
@@ -31,59 +36,73 @@ tickers = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD'
             ,'USDCNH', 'USDJPY', 'USDMXN', 'USDNOK', 'USDSEK'
             ,'USDTRY', 'USDZAR', 'ZARJPY']
 
-interval = "1min"
-fx_loc = "data/fx_prices"
-today = date.today()
-date_parser = pd.to_datetime
+Xy = pd.read_pickle('data/fx_empirical_asset_pricing_via_ml/Xy.pkl')
+Xy.dayofweek = Xy.dayofweek.astype(np.float64)
+# print(Xy.info(verbose=True))
+
+train, test = train_test_split(Xy, test_size=0.2)
+train, val = train_test_split(train, test_size=0.2)
+# print(len(train), 'train examples')
+# print(len(val), 'validation examples')
+# print(len(test), 'test examples')
+
+def df_to_dataset(dataframe, shuffle=True, batch_size=32):
+  dataframe = dataframe.copy()
+  labels = dataframe.pop('target')
+  ds = tf.data.Dataset.from_tensor_slices((dict(dataframe), labels))
+  if shuffle:
+    ds = ds.shuffle(buffer_size=len(dataframe))
+  ds = ds.batch(batch_size)
+  return ds
+
+batch_size = 32 # A small batch sized is used for demonstration purposes
+train_ds = df_to_dataset(train, batch_size=batch_size)
+val_ds = df_to_dataset(val, shuffle=False, batch_size=batch_size)
+test_ds = df_to_dataset(test, shuffle=False, batch_size=batch_size)
 
 
-source_latest_open_close = pd.read_pickle("data/open_closes_source_latest_2019-10-01.pkl").sort_index()
-closes = source_latest_open_close[[close for close in source_latest_open_close.columns.tolist() if "close" in close]]
+# for feature_batch, label_batch in train_ds.take(1):
+#  # print('Every feature:', list(feature_batch.keys()))
+#  numeric_cols = list(feature_batch.keys())
+#  print(numeric_cols)
 
 
-def read_df_format_datetime(file, root):
-    df = pd.read_csv(root + "/" + file, date_parser=date_parser)
-    df.index = pd.to_datetime(df['date'], dayfirst=True)
-    return df
+## TODO customize below
+numeric_cols = Xy.columns.tolist()
+numeric_cols.remove('ticker')
 
-feat_df_li =[]
+feature_columns = []
 
-for ticker in tickers:
-    li_full_hist_ticker =[]
-    for root, dirs, files in os.walk(fx_loc):
-        # print(root)
-        if '.DS_Store' not in files and len(files) != 0:
-            li_full_hist_ticker.extend([read_df_format_datetime(file, root) for file in files
-                                    if file.endswith(".csv") and ticker in file])
-    # [print(type(x)) for x in li_full_hist_ticker]
-    df_full_hist_ticker = reduce(lambda X, x: X.sort_index().append(x.sort_index()), li_full_hist_ticker)
-    # print(type(df_full_hist_ticker))
-    df_full_hist_ticker = df_full_hist_ticker.loc[~df_full_hist_ticker.index.duplicated(keep='first')]
+# numeric cols, make sure everything is float
+for header in numeric_cols:
+  feature_columns.append(feature_column.numeric_column(header, normalizer_fn=lambda x: (x - 3.0) / 4.2))
 
-    df_ticker_feat = step2_feat_swifter_tools.feat_ticker(df_full_hist_ticker[ticker +" 4. close"].to_frame(), closes, ticker, ticker +" 4. close")
+# indicator cols
+thal = feature_column.categorical_column_with_vocabulary_list('ticker', tickers)
+# thal_one_hot = feature_column.indicator_column(thal)
+# feature_columns.append(thal_one_hot)
 
-    feat_df_li.append(df_ticker_feat.dropna().reset_index(drop=True))
+# embedding cols
+thal_embedding = feature_column.embedding_column(thal, dimension=8)
+feature_columns.append(thal_embedding)
 
-Xy = reduce(lambda X,x: X.reset_index(drop=True).append(x), feat_df_li)
-
-Xy.to_csv('data/fx_empirical_asset_pricing_via_ml/Xy.csv')
-Xy.to_pickle('data/fx_empirical_asset_pricing_via_ml/Xy.pkl')
+feature_layer = tf.keras.layers.DenseFeatures(feature_columns)
 
 
-'''
-def read_df_format_datetime(files, root):
-    dfs = [pd.read_csv(root+ "/" + file, date_parser=date_parser) for file in files if file.endswith(".csv")]
-    for df in dfs:
-        df.index = pd.to_datetime(df['date'], dayfirst=True)
-    dfs = [df.sort_index()[[col for col in df.columns.tolist() if "close" in col or "open" in col]].interpolate() for df in dfs]
-    dfs = reduce(lambda X,x: pd.merge_asof(X.sort_index(), x.sort_index(),
-                        left_index=True, right_index=True, direction='forward',tolerance=pd.Timedelta('2ms')), dfs)
-    return dfs
+model = tf.keras.Sequential([
+  feature_layer,
+  layers.Dense(128, activation='relu'),
+  layers.Dense(128, activation='relu'),
+  layers.Dense(1, activation='sigmoid')
+])
 
+model.compile(optimizer='adam',
+              loss='binary_crossentropy',
+              metrics=['accuracy'])
 
-source_latest = reduce(lambda X,x: X.sort_index().append(x.sort_index()), [read_df_format_datetime(files,root) for root, _, files in os.walk(fx_loc) if '.DS_Store' not in files if len(files)!=0])
-source_latest = source_latest.loc[~source_latest.index.duplicated(keep='first')].sort_index().interpolate()
+model.fit(train_ds,
+          validation_data=val_ds,
+          epochs=5)
 
-source_latest.to_pickle("data/open_closes_source_latest_%s.pkl"%today)
-source_latest.to_csv("data/open_closes_source_latest_%s.csv"%today)
-'''
+loss, accuracy = model.evaluate(test_ds)
+print("Accuracy", accuracy)
