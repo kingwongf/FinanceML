@@ -1,7 +1,7 @@
 from datetime import date
 import os
 from functools import reduce
-
+import swifter  ## needed for py 3.7 import settings
 import pandas as pd
 
 from tools import step2_feat_swifter_tools
@@ -29,7 +29,7 @@ today = date.today()
 date_parser = pd.to_datetime
 
 
-source_latest_open_close = pd.read_pickle("data/open_closes_source_latest_2019-10-01.pkl").sort_index()
+source_latest_open_close = pd.read_pickle("data/open_closes_source_latest_2019-10-04.pkl").sort_index()
 closes = source_latest_open_close[[close for close in source_latest_open_close.columns.tolist() if "close" in close]]
 
 
@@ -52,7 +52,8 @@ for ticker in tickers:
     # print(type(df_full_hist_ticker))
     df_full_hist_ticker = df_full_hist_ticker.loc[~df_full_hist_ticker.index.duplicated(keep='first')]
 
-    df_ticker_feat = step2_feat_swifter_tools.feat_ticker(df_full_hist_ticker[ticker +" 4. close"].to_frame(), closes, ticker, ticker +" 4. close")
+    ## last element as pred freq in min
+    df_ticker_feat = step2_feat_swifter_tools.feat_ticker(df_full_hist_ticker[ticker +" 4. close"].to_frame(), closes, ticker, ticker +" 4. close", 60)
 
     feat_df_li.append(df_ticker_feat.dropna().reset_index(drop=True))
 

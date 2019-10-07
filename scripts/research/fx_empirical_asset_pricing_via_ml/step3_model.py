@@ -5,6 +5,9 @@ from keras import backend as K
 from sklearn.model_selection import train_test_split
 from tensorflow import feature_column
 from tensorflow.keras import layers
+from tensorflow.keras import regularizers
+
+
 
 pd.set_option('display.max_columns', None)  # or 1000
 pd.set_option('display.max_rows', None)  # or 1000
@@ -82,13 +85,18 @@ def coeff_determination(y_true, y_pred):
 
 model = tf.keras.Sequential([
   feature_layer,
-  layers.Dense(128, activation='relu'),
-  layers.Dropout(0.5),
-  layers.Dense(256, activation='relu'),
-  layers.Dropout(0.5),
-  layers.Dense(128, activation='relu'),
-  layers.Dense(64, activation='relu'),
-  layers.Dense(1, activation='relu')
+    layers.BatchNormalization(),
+    layers.Dense(32, activation='relu',
+                activity_regularizer=regularizers.l1(0.001)),
+  #  layers.Dropout(0.5),
+   # layers.BatchNormalization(),
+   # layers.Dense(64, activation='relu'),
+  #  layers.BatchNormalization(),
+  #  layers.Dropout(0.1),
+  #  layers.Dense(8, activation='relu'),
+    layers.BatchNormalization(),
+    layers.Dense(1, activation='linear')
+    # layers.LeakyReLU(alpha=0.3)
 ])
 
 model.compile(optimizer='adam',
@@ -97,7 +105,9 @@ model.compile(optimizer='adam',
 
 model.fit(train_ds,
           validation_data=val_ds,
-          epochs=100, callbacks=[callback])
+          epochs=5, callbacks=[callback])
+
+print(model.layers[0].output)
 
 loss, coeff_determination, accuracy = model.evaluate(test_ds)
 print("R^2", coeff_determination)

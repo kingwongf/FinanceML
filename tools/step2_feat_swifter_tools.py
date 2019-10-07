@@ -15,7 +15,7 @@ pd.set_option('display.max_colwidth', -1)  # or 199
 ## TODO momentum and change of momentun
 
 
-def feat_ticker(close_df, closes, ticker, ticker_close):
+def feat_ticker(close_df, closes, ticker, ticker_close, pred_freq):
 
     ''' close_df refers to one ticker/ pair dataframe with only one column, close_df[ticker_close]
         closes refers to all pairs df
@@ -157,7 +157,7 @@ def feat_ticker(close_df, closes, ticker, ticker_close):
 
     ## TODO add label/ target, maybe change func to parse in the future
 
-    feat_df['target'] = close_df.swifter.apply(featGen.ret, n=min).shift(-min).fillna(method='ffill')
+    feat_df['target'] = close_df.swifter.apply(featGen.ret, n=pred_freq).shift(-pred_freq).fillna(method='ffill')
 
     # print('feat index', feat_df.index)
 
