@@ -62,7 +62,8 @@ feature_columns = []
 
 # numeric cols, make sure everything is float
 for header in numeric_cols:
-  feature_columns.append(feature_column.numeric_column(header, normalizer_fn=lambda x: (x - 3.0) / 4.2))
+  # feature_columns.append(feature_column.numeric_column(header, normalizer_fn=lambda x: (x - 3.0) / 4.2))
+  feature_columns.append(feature_column.numeric_column(header))
 
 # indicator cols
 thal = feature_column.categorical_column_with_vocabulary_list('ticker', Xy.ticker.unique().tolist())

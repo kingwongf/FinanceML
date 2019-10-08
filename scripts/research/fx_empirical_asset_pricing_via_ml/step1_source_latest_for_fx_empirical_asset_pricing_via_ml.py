@@ -3,6 +3,7 @@ import os
 from functools import reduce
 import swifter  ## needed for py 3.7 import settings
 import pandas as pd
+import swifter
 
 from tools import step2_feat_swifter_tools
 

@@ -159,6 +159,7 @@ def feat_ticker(close_df, closes, ticker, ticker_close, pred_freq):
 
     feat_df['target'] = close_df.swifter.apply(featGen.ret, n=pred_freq).shift(-pred_freq).fillna(method='ffill')
 
+
     # print('feat index', feat_df.index)
 
     return feat_df
