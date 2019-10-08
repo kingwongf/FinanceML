@@ -89,7 +89,7 @@ def maxret(close, period=1):
     return max_ret
 
 def ret(close, n=1):
-    ret_ = np.log(close).diff(n)
+    ret_ = np.log(close).diff(-n).shift(n)
     return ret_
 def side(close, n=1):
     ret_ = ret(close, n=n)

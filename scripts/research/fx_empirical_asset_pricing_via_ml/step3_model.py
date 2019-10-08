@@ -23,7 +23,10 @@ tickers = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD'
             ,'USDCNH', 'USDJPY', 'USDMXN', 'USDNOK', 'USDSEK'
             ,'USDTRY', 'USDZAR', 'ZARJPY']
 
-Xy = pd.read_pickle('data/fx_empirical_asset_pricing_via_ml/Xy.pkl')
+Xy = pd.read_pickle('/Users/kingf.wong/Development/FinanceML/data/fx_empirical_asset_pricing_via_ml/Xy.pkl')
+Xy = Xy.dropna(axis='columns')
+
+
 Xy.dayofweek = Xy.dayofweek.astype(np.float64)
 # print(Xy.info(verbose=True))
 
@@ -42,7 +45,7 @@ def df_to_dataset(dataframe, shuffle=True, batch_size=32):
   ds = ds.batch(batch_size)
   return ds
 
-batch_size = 32 # A small batch sized is used for demonstration purposes
+batch_size = 1
 train_ds = df_to_dataset(train, batch_size=batch_size)
 val_ds = df_to_dataset(val, shuffle=False, batch_size=batch_size)
 test_ds = df_to_dataset(test, shuffle=False, batch_size=batch_size)
@@ -76,7 +79,7 @@ feature_columns.append(thal_embedding)
 
 feature_layer = tf.keras.layers.DenseFeatures(feature_columns)
 
-callback = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=10)
+callback = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5)
 
 def coeff_determination(y_true, y_pred):
     SS_res =  K.sum(K.square( y_true-y_pred ))
@@ -88,10 +91,10 @@ model = tf.keras.Sequential([
   feature_layer,
     layers.BatchNormalization(),
     layers.Dense(32, activation='relu',
-                activity_regularizer=regularizers.l1(0.001)),
+                activity_regularizer=regularizers.l1(0.0001)),
   #  layers.Dropout(0.5),
-   # layers.BatchNormalization(),
-   # layers.Dense(64, activation='relu'),
+   layers.BatchNormalization(),
+   layers.Dense(64, activation='relu'),
   #  layers.BatchNormalization(),
   #  layers.Dropout(0.1),
   #  layers.Dense(8, activation='relu'),
@@ -101,14 +104,14 @@ model = tf.keras.Sequential([
 ])
 
 model.compile(optimizer='adam',
-              loss='binary_crossentropy',
+              loss='mean_squared_error',
               metrics=[coeff_determination, 'accuracy'])
 
 model.fit(train_ds,
           validation_data=val_ds,
           epochs=5, callbacks=[callback])
 
-print(model.layers[0].output)
+# print(model.layers[0].output)
 
 loss, coeff_determination, accuracy = model.evaluate(test_ds)
 print("R^2", coeff_determination)
