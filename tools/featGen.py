@@ -13,6 +13,10 @@ def ema(close, span=None, alpha=None):
     ema = close.ewm(span=span, alpha=alpha,adjust=False,ignore_na=False).mean()
     return ema
 
+def ama(close, span=None, alpha=None):
+    ama = close.ma(span=span, alpha=alpha,adjust=False,ignore_na=False).mean()
+    return ama
+
 def relEMA(fast_ema, slow_ema):
     return fast_ema/ slow_ema
 
@@ -85,8 +89,12 @@ def maxret(close, period=1):
     return max_ret
 
 def ret(close, n=1):
-    ret_ = np.log(close).diff(n)
+    ret_ = np.log(close).diff(-n).shift(n)
     return ret_
+def side(close, n=1):
+    ret_ = ret(close, n=n)
+    side_ = np.sign(ret_)
+    return side_
 #K, D = stochRSI(price['4. close'])
 
 #print(MACD(price['4. close']))
