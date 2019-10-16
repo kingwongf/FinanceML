@@ -8,24 +8,59 @@ from alpha_vantage.foreignexchange import ForeignExchange
 from alpha_vantage.techindicators import TechIndicators
 from datetime import date
 
+from datetime import date
+import time
+import os
 
-ticker = "USDTRY"
+tickers = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD'
+            ,'CADCHF', 'CADJPY', 'EURAUD', 'EURCAD', 'EURCHF'
+            ,'EURGBP', 'EURJPY', 'EURNOK', 'EURNZD', 'EURSEK'
+            ,'EURTRY', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF'
+            ,'GBPJPY', 'GBPNZD', 'GBPUSD', 'NZDCAD', 'NZDCHF'
+            ,'NZDJPY', 'NZDUSD', 'TRYJPY', 'USDCAD', 'USDCHF'
+            ,'USDCNH', 'USDJPY', 'USDMXN', 'USDNOK', 'USDSEK'
+            ,'USDTRY', 'USDZAR', 'ZARJPY']
+
+# missing 'USDCNH',
+# tickers =['USDJPY', 'USDMXN', 'USDNOK', 'USDSEK'
+#             ,'USDTRY', 'USDZAR', 'ZARJPY']
 
 '''supported values are '1min', '5min', '15min', '30min', '60min', 'daily', 'weekly', 'monthly' '''
 
-interval = "1min"
+interval = "daily"
 today = date.today()
-key='NB6G0K9K27IGEWXW'
+keys_file = open("/Users/kingf.wong/Development/FinanceML/resources/keys.txt", "r")
 
+for lines in keys_file:
+    keys = lines.split(",")
+
+key = keys[1]
+
+today_dir = "/Users/kingf.wong/Development/FinanceML/data/fx_daily_prices/" + str(today)
+# os.mkdir(today_dir)
 
 ts = TimeSeries(key=key, output_format='pandas')
 
 '''intraday data fetch'''
-price, meta_data = ts.get_intraday(symbol=ticker,interval=interval, outputsize='full')
+# price, meta_data = ts.get_intraday(symbol=ticker,interval=interval, outputsize='full')
 
-print(price)
+
 '''daily data fetch'''
-#price, meta_data = ts.get_daily(symbol=ticker, outputsize='full')
+
+ts = TimeSeries(key=key, output_format='pandas')
+price, meta_data = ts.get_daily(symbol=tickers[0], outputsize='full')
+print(price)
+'''
+for i,ticker in enumerate(tickers):
+    if i%5==0 and i!=0:
+        print("1 min wait triggered")
+        time.sleep(60)
+    ts = TimeSeries(key=key, output_format='pandas')
+    price, meta_data = ts.get_daily(symbol=ticker, outputsize='full')
+    price.rename(columns=lambda x: ticker + " " + x, inplace=True)
+    price.to_csv(today_dir + "/" + interval + '_price_' + ticker + "_" + str(today) + '.csv')
+    print("finished " + ticker + " " + str(today))
+'''
 
 
 #ta = TechIndicators(key=key, output_format='pandas')
