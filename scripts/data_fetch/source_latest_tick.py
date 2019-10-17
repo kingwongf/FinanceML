@@ -48,12 +48,14 @@ for root, _, files in os.walk(fx_loc):
                 df = pd.read_csv(csv_path, header=None, names=['ticker', 'date', ticker + '_bid', ticker + '_ask'], low_memory=False)
                 os.remove(csv_path)
                 df.index = pd.to_datetime(df.date)
-                df = df.drop('ticker',axis=1)
+                df = df.drop(['ticker', 'date'],axis=1)
                 dfs.append(df)
+        print(len(dfs))
         dfs_ = reduce(lambda X, x: pd.merge_asof(X.sort_index(), x.sort_index(),
                                             left_index=True, right_index=True, direction='forward',
                                             tolerance=pd.Timedelta('2ms')), dfs)
         dfs_ = dfs_.resample('D').first()
+        print(dfs_.columns)
         dfs_.to_pickle(root + "/daily_fx.pkl")
 elapsed_time = time.process_time() - t
 print(elapsed_time, " s")
